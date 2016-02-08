@@ -2,6 +2,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>uk.gov.dvla.dsp</groupId>
+        <artifactId>dsp-parent</artifactId>
+        <version>3.2-SNAPSHOT</version>
+    </parent>
+
     <groupId>uk.gov.dvla.osl</groupId>
     <artifactId>eventstore-client</artifactId>
     <version>1.0-SNAPSHOT</version>
@@ -15,6 +21,11 @@
         <rxjava.version>0.20.7</rxjava.version>
         <junit.version>4.12</junit.version>
     </properties>
+
+    <scm>
+        <developerConnection>scm:git:ssh://git@stash0001-01.b428.dvla.gov.uk:7999/ved/eventstore-client.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
 
     <dependencies>
 
@@ -71,19 +82,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <distributionManagement>
-        <repository>
-            <id>DVLAInternalReleases</id>
-            <name>Internal Releases</name>
-            <url>http://server01:8081/nexus/content/repositories/releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>DVLAInternalSnapshots</id>
-            <name>Internal Snapshots</name>
-            <url>http://server01:8081/nexus/content/repositories/snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
 
     <build>
         <plugins>
