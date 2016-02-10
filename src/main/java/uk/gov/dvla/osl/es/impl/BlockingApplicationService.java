@@ -1,5 +1,6 @@
 package uk.gov.dvla.osl.es.impl;
 
+import uk.gov.dvla.osl.es.api.Aggregate;
 import uk.gov.dvla.osl.es.api.Command;
 import uk.gov.dvla.osl.es.api.Event;
 import uk.gov.dvla.osl.es.store.memory.EventStore;
@@ -38,7 +39,8 @@ public class BlockingApplicationService {
         for (Event event : eventStream) {
             ReflectionUtil.invokeHandleMethod(target, event);
         }
-        List<Event> events = ReflectionUtil.invokeHandleMethod(target, command);
+        ReflectionUtil.invokeHandleMethod(target, command);
+        List<Event> events = ((Aggregate) target).getUncommittedEvents();
         if (events != null && events.size() > 0) {
             eventStore.storeBlocking(command.aggregateId(), eventStream.version(), events, timeout, timeoutUnit);
         } else {
