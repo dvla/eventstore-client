@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import rx.Observable;
 import rx.Subscriber;
 import uk.gov.dvla.osl.es.api.EventStoreEvent;
+import uk.gov.dvla.osl.es.exception.EventStoreClientTechnicalException;
+import uk.gov.dvla.osl.es.exception.EventStoreClientUnknownStreamException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -57,9 +59,8 @@ public class EventStoreStream {
         getHeadOfStream();
 
         if (!getResult()) {
-            System.out.print("\nGet Head of Stream failed");
-            System.out.print("\n" + getErrorMessage());
-            System.exit(1);
+            logger.error("Get Head of Stream failed" + getErrorMessage() );
+            throw new EventStoreClientTechnicalException(getErrorMessage());
         }
 
         processEvents(subscriber);
@@ -219,35 +220,31 @@ public class EventStoreStream {
         return responseURI;
     }
 
-    private String getURL(String url, boolean longPoll) throws IOException {
+    /**
+     * reads the response from URL endpoint.
+     *
+     * @param url the URL of the GET request
+     * @param longPoll - NOT USED (need to refactor)
+     * @return the response as an string
+     * @throws IOException
+     * @throws EventStoreClientUnknownStreamException unable to connect to url
+     */
+    private String getURL(String url, boolean longPoll) throws IOException, EventStoreClientUnknownStreamException {
 
         int responseCode = 0;
-
-//        URL urlObj = new URL(URLEncoder.encode(url, "UTF-8"));
         URL urlObj = new URL(url);
 
-//        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("192.168.99.100", 32771));
-
-//        HttpURLConnection con = (HttpURLConnection) urlObj.openConnection(proxy);
-//        con.setUseCaches(true);
         HttpURLConnection con = (HttpURLConnection) urlObj.openConnection();
 
         con.setRequestMethod("GET");
-//        if (longPoll) {
-//            con.setRequestProperty("ES-LongPoll", "30");
-//        }
-
         con.setRequestProperty("Accept" , this.mimetype );
 
         responseCode = con.getResponseCode();
 
-//        logger.debug("Cache-Control: " + con.getHeaderField("Cache-Control"));
-//        logger.debug("Response-Code: " + con.getResponseCode());
-
         if (responseCode != 200) {
             if (responseCode == 406) {logger.error("\nhttp response 406: unacceptable content type specified: " + this.mimetype);}
             if (responseCode == 404) {logger.error("\nhttp response 404: unable to locate stream: " + url);}
-            System.exit(responseCode);
+            throw new EventStoreClientUnknownStreamException("http response:" + responseCode);
         }
 
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
@@ -268,9 +265,8 @@ public class EventStoreStream {
         try {
             payload = (JSONObject) parser.parse(response);
         } catch (ParseException e) {
-            System.out.println("Input file has JSON parse error: " + e.getPosition() + " "
+            logger.error("Input file has JSON parse error: " + e.getPosition() + " "
                     + e.toString());
-            System.exit(4);
         }
         return payload;
     }
