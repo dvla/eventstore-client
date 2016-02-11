@@ -224,7 +224,7 @@ public class EventStoreStream {
      * reads the response from URL endpoint.
      *
      * @param url the URL of the GET request
-     * @param longPoll - NOT USED (need to refactor)
+     * @param longPoll whether to long poll
      * @return the response as an string
      * @throws IOException
      * @throws EventStoreClientUnknownStreamException unable to connect to url
@@ -237,6 +237,9 @@ public class EventStoreStream {
         HttpURLConnection con = (HttpURLConnection) urlObj.openConnection();
 
         con.setRequestMethod("GET");
+        if (longPoll) {
+            con.setRequestProperty("ES-LongPoll", "30");
+        }
         con.setRequestProperty("Accept" , this.mimetype );
 
         responseCode = con.getResponseCode();
