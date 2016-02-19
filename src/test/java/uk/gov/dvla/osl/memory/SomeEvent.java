@@ -1,6 +1,6 @@
 package uk.gov.dvla.osl.memory;
 
-import uk.gov.dvla.osl.es.api.Event;
+import gov.dvla.osl.eventsourcing.api.Event;
 
 import java.util.UUID;
 

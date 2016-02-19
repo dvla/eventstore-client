@@ -1,9 +1,9 @@
 package uk.gov.dvla.osl.memory;
 
 import org.junit.Test;
-import uk.gov.dvla.osl.es.api.Event;
-import uk.gov.dvla.osl.es.store.memory.EventStream;
-import uk.gov.dvla.osl.es.store.memory.InMemoryEventStore;
+import gov.dvla.osl.eventsourcing.api.Event;
+import gov.dvla.osl.eventsourcing.store.memory.EventStream;
+import gov.dvla.osl.eventsourcing.store.memory.InMemoryEventStore;
 
 import java.util.Arrays;
 import java.util.UUID;
