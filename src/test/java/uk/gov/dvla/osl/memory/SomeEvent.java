@@ -23,4 +23,9 @@ public class SomeEvent implements Event {
         this.surname = surname;
         this.email = email;
     }
+
+    @Override
+    public UUID aggregateId() {
+        return driverId;
+    }
 }

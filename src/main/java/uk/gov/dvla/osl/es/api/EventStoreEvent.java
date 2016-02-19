@@ -5,12 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class EventStoreEvent {
     private String eventType;
     private String data;
     private int eventNumber;
     private String eventId;
+    private int positionEventNumber;
 
     private ObjectMapper mapper;
 
@@ -28,8 +30,13 @@ public class EventStoreEvent {
         this.data = data;
     }
 
-    public Event getEvent() throws ClassNotFoundException, IOException {
-        Class clazz = Class.forName(this.eventType);
+    public Event getEvent() throws IOException {
+        Class clazz = null;
+        try {
+            clazz = Class.forName(this.eventType);
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
         return (Event) mapper.readValue(data, clazz);
     }
 
@@ -47,5 +54,13 @@ public class EventStoreEvent {
 
     public void setEventId(String eventId) {
         this.eventId = eventId;
+    }
+
+    public int getPositionEventNumber() {
+        return positionEventNumber;
+    }
+
+    public void setPositionEventNumber(int positionEventNumber) {
+        this.positionEventNumber = positionEventNumber;
     }
 }

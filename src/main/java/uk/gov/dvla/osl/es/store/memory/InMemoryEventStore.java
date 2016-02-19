@@ -2,6 +2,7 @@ package uk.gov.dvla.osl.es.store.memory;
 
 import rx.Observable;
 import uk.gov.dvla.osl.es.api.Event;
+import uk.gov.dvla.osl.es.api.EventStoreEvent;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,10 +54,15 @@ public class InMemoryEventStore implements EventStore<Long> {
 	}
 
 	@Override
-	public Observable<Event> all() {
+	public Observable<EventStoreEvent> all() {
 		throw new UnsupportedOperationException();
 	}
-	
+
+	@Override
+	public Observable<EventStoreEvent> streamFrom(String streamName) {
+		return null;
+	}
+
 }
 
 class Transaction implements Comparable<Transaction> {

@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EventStoreStream {
+
     private static final Logger logger = LoggerFactory.getLogger(EventStoreStream.class);
 
     private String stream;
@@ -30,22 +31,21 @@ public class EventStoreStream {
     private List<EventStoreEvent> data;
     private String error;
     private String mimetype;
-    private boolean embedData;
+    private boolean startLongPoll = false;
 
-    public EventStoreStream (String stream, boolean embedData, boolean keepAlive) throws IOException {
+    public EventStoreStream(String stream, boolean keepAlive) throws IOException {
         this.stream = stream;
         this.keepAlive = keepAlive;
         this.mimetype = "application/vnd.eventstore.atom+json";
-        this.embedData = embedData;
     }
 
-    public Observable<EventStoreEvent> all() {
+    public Observable<EventStoreEvent> readStreamEventsForward() {
         return Observable.create(subscribeFunction);
     }
 
     Observable.OnSubscribe<EventStoreEvent> subscribeFunction = (s) -> {
 
-        Subscriber subscriber = (Subscriber)s;
+        Subscriber subscriber = (Subscriber) s;
 
         try {
             processData(subscriber);
@@ -56,10 +56,10 @@ public class EventStoreStream {
 
     private void processData(Subscriber subscriber) throws Exception {
 
-        getHeadOfStream();
+        getLastPageOfStream();
 
         if (!getResult()) {
-            logger.error("Get Head of Stream failed" + getErrorMessage() );
+            logger.error("Get Head of Stream failed: " + getErrorMessage());
             throw new EventStoreClientTechnicalException(getErrorMessage());
         }
 
@@ -68,21 +68,17 @@ public class EventStoreStream {
         String previous;
 
         do {
+
             previous = getPreviousLink();
 
             do {
-                gotoPrevious(previous);
+                getPreviousPayload(previous);
 
                 while (getPreviousLink().equals("")) {
 
-                    gotoPrevious(previous);
-
                     if (keepAlive) {
-                        while (getPreviousLink().equals("")) {
-                            gotoPrevious(previous);
-                        }
-                    }
-                    else {
+                        getPreviousPayload(previous);
+                    } else {
                         subscriber.onCompleted();
                         return;
                     }
@@ -97,43 +93,32 @@ public class EventStoreStream {
 
     private void processEvents(Subscriber subscriber) throws Exception {
 
-        this.data = getTheData(this.payload);
+        this.data = getEvents(this.payload);
 
         if (dataExists()) {
-            for (EventStoreEvent eventStoreEvent : getData()) {
-                subscriber.onNext(eventStoreEvent);
-            }
+            getData().forEach(subscriber::onNext);
         }
     }
 
-    public void getHeadOfStream () throws IOException {
+    public void getLastPageOfStream() throws IOException {
 
         // Start at the head of the stream
         //
-        this.payload = extract(getURL(stream, true));
+        logger.debug("Getting head of stream...");
+        this.payload = extractPayload(getURL(stream));
 
-        if (payload.containsKey("headOfStream")) {
+        JSONArray entries = (JSONArray) payload.get("entries");
 
-            if (payload.get("headOfStream").equals(true)) {
-                String last = getLink(payload,"last");
-                if (!last.equals("")) {
-                    this.payload = extract(getURL(last, true));
-                    result = true;
-                }
-                else {
-                    result = true;  // This one is the last one
-                }
+        if (entries.size() > 0) {
+            String last = getLink(payload, "last");
+            if (!last.equals("")) {
+                this.payload = extractPayload(getURL(last));
+                result = true;
+            } else {
+                result = true;  // This one is the last one
             }
-            else {
-                result = false;
-                error = stream + " - is not head of stream";
-            }
-        }
-        else {
-            result = false;
-            error = stream + " - is not head of stream";
-
-        }
+        } else
+            result = true;
     }
 
     public String getErrorMessage() {
@@ -148,56 +133,35 @@ public class EventStoreStream {
         return this.data;
     }
 
-    public void gotoPrevious(String previous) throws IOException {
-        this.payload = extract(getURL(previous, true));
+    public void getPreviousPayload(String previous) throws IOException {
+        logger.debug("Extracting previous payload...");
+        this.payload = extractPayload(getURL(previous));
     }
 
     public String getPreviousLink() {
-        return getLink(this.payload,"previous");
+
+        String link = getLink(this.payload, "previous");
+
+        if (link.equals(""))
+            link = this.stream;
+
+        return link;
     }
 
-    private List<EventStoreEvent> getTheData(JSONObject payload) throws IOException, ClassNotFoundException {
+    private List<EventStoreEvent> getEvents(JSONObject payload) throws IOException, ClassNotFoundException {
 
         JSONArray entries = (JSONArray) payload.get("entries");
 
         List<EventStoreEvent> events = new ArrayList<>();
 
-        String entryResponse;
-
         for (int i = entries.size() - 1; i > -1; i--) {
             JSONObject entry = (JSONObject) entries.get(i);
-
-            if (embedData) {
-                EventStoreEvent eventStoreEvent = new EventStoreEvent();
-                eventStoreEvent.setEventType(entry.get("eventType").toString());
-                eventStoreEvent.setData(entry.get("data").toString());
-                eventStoreEvent.setEventNumber(Integer.parseInt(entry.get("eventNumber").toString()));
-                events.add(eventStoreEvent);
-            } else {
-                JSONArray entryLinks = (JSONArray) entry.get("links");
-
-                for (Object entryLink1 : entryLinks) {
-                    JSONObject entryLink = (JSONObject) entryLink1;
-                    if (entryLink.get("relation").equals("alternate")) {
-
-                        entryResponse = getURL(entryLink.get("uri").toString(), false);
-
-                        EventStoreEvent eventStoreEvent = new EventStoreEvent();
-
-                        JSONObject entryPayload = extract(entryResponse);
-
-                        String content = entryPayload.get("content").toString();
-
-                        JSONObject cnt = extract(content);
-
-                        eventStoreEvent.setData(cnt.get("data").toString());
-                        eventStoreEvent.setEventType(cnt.get("eventType").toString());
-                        eventStoreEvent.setEventNumber(Integer.parseInt(cnt.get("eventNumber").toString()));
-
-                        events.add(eventStoreEvent);
-                    }
-                }
-            }
+            EventStoreEvent eventStoreEvent = new EventStoreEvent();
+            eventStoreEvent.setEventType(entry.get("eventType").toString());
+            eventStoreEvent.setData(entry.get("data").toString());
+            eventStoreEvent.setEventNumber(Integer.parseInt(entry.get("eventNumber").toString()));
+            eventStoreEvent.setPositionEventNumber(Integer.parseInt(entry.get("positionEventNumber").toString()));
+            events.add(eventStoreEvent);
         }
         return events;
     }
@@ -224,22 +188,24 @@ public class EventStoreStream {
      * reads the response from URL endpoint.
      *
      * @param url the URL of the GET request
-     * @param longPoll whether to long poll
      * @return the response as an string
      * @throws IOException
      * @throws EventStoreClientUnknownStreamException unable to connect to url
      */
-    private String getURL(String url, boolean longPoll) throws IOException, EventStoreClientUnknownStreamException {
+    private String getURL(String url) throws IOException, EventStoreClientUnknownStreamException {
+
+        logger.debug(url);
 
         int responseCode = 0;
-        URL urlObj = new URL(url);
+        URL urlObj = new URL(url + "?embed=body");
 
         HttpURLConnection con = (HttpURLConnection) urlObj.openConnection();
 
         con.setRequestMethod("GET");
-        if (longPoll) {
+        if (startLongPoll) {
             con.setRequestProperty("ES-LongPoll", "30");
         }
+
         con.setRequestProperty("Accept" , this.mimetype );
 
         responseCode = con.getResponseCode();
@@ -261,12 +227,18 @@ public class EventStoreStream {
         return response;
     }
 
-    private JSONObject extract(String response) {
+    private JSONObject extractPayload(String response) {
+
         JSONParser parser = new JSONParser();
         JSONObject payload = null;
 
         try {
             payload = (JSONObject) parser.parse(response);
+
+            JSONArray entries = (JSONArray) payload.get("entries");
+
+            startLongPoll = entries != null && entries.size() == 0;
+
         } catch (ParseException e) {
             logger.error("Input file has JSON parse error: " + e.getPosition() + " "
                     + e.toString());

@@ -20,6 +20,7 @@ import rx.Observable;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import uk.gov.dvla.osl.es.api.Event;
+import uk.gov.dvla.osl.es.api.EventStoreEvent;
 import uk.gov.dvla.osl.es.impl.Sneak;
 import uk.gov.dvla.osl.es.store.memory.EventStore;
 import uk.gov.dvla.osl.es.store.memory.EventStream;
@@ -88,6 +89,17 @@ public class EventStoreEventStore implements EventStore<Long> {
         String json = new String(event.data().data().value().toArray(), UTF8);
         Event domainEvent = mapper.readValue(json, type);
         return domainEvent;
+    }
+
+    private EventStoreEvent parseEvent(eventstore.Event event)
+            throws ClassNotFoundException, IOException {
+        Class<? extends Event> type = (Class<? extends Event>) Class.forName(event.data().eventType());
+        String json = new String(event.data().data().value().toArray(), UTF8);
+        Event domainEvent = mapper.readValue(json, type);
+        EventStoreEvent eventStoreEvent = new EventStoreEvent();
+        eventStoreEvent.setData(domainEvent.toString());
+        eventStoreEvent.setEventNumber(event.number().value());
+        return eventStoreEvent;
     }
 
     @Override
@@ -178,8 +190,8 @@ public class EventStoreEventStore implements EventStore<Long> {
     }
 
     @Override
-    public Observable<Event> all() {
-        return create((Observable.OnSubscribe<Event>) subscriber -> connection.subscribeToAllFrom(new SubscriptionObserver<IndexedEvent>() {
+    public Observable<EventStoreEvent> all() {
+        return create((Observable.OnSubscribe<EventStoreEvent>) subscriber -> connection.subscribeToAllFrom(new SubscriptionObserver<IndexedEvent>() {
 
             @Override
             public void onLiveProcessingStart(Closeable arg0) {
@@ -191,7 +203,7 @@ public class EventStoreEventStore implements EventStore<Long> {
                 if (!event.event().streamId().isSystem() && event.event().streamId().streamId().startsWith("driver")) {
                     try {
 system.log().debug(event.toString());
-                        subscriber.onNext(parse(event.event()));
+                        subscriber.onNext(parseEvent(event.event()));
                     } catch (Exception e) {
                         logger.warn("Error when handling event", e);
                     }
@@ -210,6 +222,41 @@ system.log().debug(event.toString());
                 subscriber.onCompleted();
             }
         }, null, false, null));
+    }
+
+    @Override
+    public Observable<EventStoreEvent> streamFrom(String streamName) {
+        return create((Observable.OnSubscribe<EventStoreEvent>) subscriber -> connection.subscribeToStreamFrom(streamName,
+                new SubscriptionObserver<eventstore.Event>() {
+
+            @Override
+            public void onLiveProcessingStart(Closeable arg0) {
+                system.log().info("live processing started");
+            }
+
+            @Override
+            public void onEvent(eventstore.Event event, Closeable arg1) {
+                try {
+                    subscriber.onNext(parseEvent(event));
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                system.log().error(e.toString());
+                subscriber.onError(e);
+            }
+
+            @Override
+            public void onClose() {
+                system.log().error("subscription closed");
+                subscriber.onCompleted();
+            }
+        }, 0, false, null));
     }
 
 }

@@ -23,11 +23,11 @@ public class ReflectionUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <R> R invokeSaveMethod(Object target) {
+	public static <R> R invokeSaveMethod(Object target, int version) {
 		try {
-			Method method = target.getClass().getMethod(SAVE_METHOD);
+			Method method = target.getClass().getMethod(ReflectionUtil.SAVE_METHOD, int.class);
 			if (method == null) return null;
-			return (R) method.invoke(target);
+			return (R) method.invoke(target, version);
 		} catch (InvocationTargetException e) {
 			throw Sneak.sneakyThrow(e.getTargetException());
 		} catch (NoSuchMethodException e) {
