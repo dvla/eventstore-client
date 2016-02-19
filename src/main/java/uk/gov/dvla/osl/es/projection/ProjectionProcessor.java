@@ -43,12 +43,11 @@ public class ProjectionProcessor {
                     try {
                         eventProcessor.processEvent(event);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        LOGGER.error(e.getMessage(), e);
                     }
                 },
                 (error) -> {
-                    LOGGER.debug("Something went wrong");
-                    error.printStackTrace();
+                    LOGGER.error(error.getMessage(), error);
                 },
                 () -> LOGGER.debug("Dealer projection finished")
         );

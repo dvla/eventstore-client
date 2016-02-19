@@ -195,14 +195,14 @@ public class EventStoreEventStore implements EventStore<Long> {
 
             @Override
             public void onLiveProcessingStart(Closeable arg0) {
-                system.log().info("live processing started");
+                logger.info("live processing started");
             }
 
             @Override
             public void onEvent(IndexedEvent event, Closeable arg1) {
                 if (!event.event().streamId().isSystem() && event.event().streamId().streamId().startsWith("driver")) {
                     try {
-system.log().debug(event.toString());
+                        logger.debug(event.toString());
                         subscriber.onNext(parseEvent(event.event()));
                     } catch (Exception e) {
                         logger.warn("Error when handling event", e);
@@ -218,7 +218,7 @@ system.log().debug(event.toString());
 
             @Override
             public void onClose() {
-                system.log().error("subscription closed");
+                logger.error("subscription closed");
                 subscriber.onCompleted();
             }
         }, null, false, null));
@@ -231,7 +231,7 @@ system.log().debug(event.toString());
 
             @Override
             public void onLiveProcessingStart(Closeable arg0) {
-                system.log().info("live processing started");
+                logger.info("live processing started");
             }
 
             @Override
@@ -253,7 +253,7 @@ system.log().debug(event.toString());
 
             @Override
             public void onClose() {
-                system.log().error("subscription closed");
+                logger.error("subscription closed");
                 subscriber.onCompleted();
             }
         }, 0, false, null));

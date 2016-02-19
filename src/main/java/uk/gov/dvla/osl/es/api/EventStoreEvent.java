@@ -30,13 +30,8 @@ public class EventStoreEvent {
         this.data = data;
     }
 
-    public Event getEvent() throws IOException {
-        Class clazz = null;
-        try {
-            clazz = Class.forName(this.eventType);
-        } catch (ClassNotFoundException e) {
-            return null;
-        }
+    public Event getEvent() throws ClassNotFoundException, IOException {
+        Class clazz = Class.forName(this.eventType);
         return (Event) mapper.readValue(data, clazz);
     }
 
