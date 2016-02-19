@@ -23,14 +23,14 @@ public class ProjectionProcessor {
     /**
      * Constructor.
      * @param streamUrl the streamUrl url eg. http://hostname:port/$ce-dealer
-     * @param eventProcessor implementaton of EventProcessor
+     * @param eventProcessor implementation of EventProcessor
      */
     public ProjectionProcessor(final String streamUrl, final EventProcessor eventProcessor) {
         this.streamUrl = streamUrl;
         this.eventProcessor = eventProcessor;
     }
 
-    public void projectVehicleEvents() throws IOException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public void projectEvents() throws IOException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
 
         int nextVersionNumber = eventProcessor.projectionVersionService().getNextVersionNumber();
 
