@@ -1,6 +1,7 @@
 package gov.dvla.osl.eventsourcing.impl;
 
 import gov.dvla.osl.eventsourcing.api.Event;
+import gov.dvla.osl.eventsourcing.api.ReflectionUtil;
 
 import java.lang.reflect.InvocationTargetException;
 

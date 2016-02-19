@@ -14,6 +14,7 @@ import eventstore.j.EsConnectionFactory;
 import eventstore.j.EventDataBuilder;
 import eventstore.j.WriteEventsBuilder;
 import eventstore.tcp.ConnectionActor;
+import gov.dvla.osl.eventsourcing.api.Sneak;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
@@ -21,7 +22,6 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import gov.dvla.osl.eventsourcing.api.EventStoreEvent;
 import gov.dvla.osl.eventsourcing.api.Event;
-import gov.dvla.osl.eventsourcing.impl.Sneak;
 import gov.dvla.osl.eventsourcing.store.memory.EventStore;
 import gov.dvla.osl.eventsourcing.store.memory.ListEventStream;
 
