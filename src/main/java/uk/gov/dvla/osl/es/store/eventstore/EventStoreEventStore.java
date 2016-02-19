@@ -116,7 +116,7 @@ public class EventStoreEventStore implements EventStore<Long> {
         try {
             future.get(timeout, timeUnit);
         } catch (InterruptedException|ExecutionException|TimeoutException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             throw new RuntimeException("Failed to store events to event store", e);
         }
     }
@@ -212,7 +212,7 @@ public class EventStoreEventStore implements EventStore<Long> {
 
             @Override
             public void onError(Throwable e) {
-                system.log().error(e.toString());
+                logger.error(e.getMessage(), e);
                 subscriber.onError(e);
             }
 
@@ -239,15 +239,15 @@ public class EventStoreEventStore implements EventStore<Long> {
                 try {
                     subscriber.onNext(parseEvent(event));
                 } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
+                    logger.error(e.getMessage(), e);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.error(e.getMessage(), e);
                 }
             }
 
             @Override
             public void onError(Throwable e) {
-                system.log().error(e.toString());
+                logger.error(e.getMessage(), e);
                 subscriber.onError(e);
             }
 
