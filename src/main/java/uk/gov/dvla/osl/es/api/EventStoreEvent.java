@@ -51,6 +51,11 @@ public class EventStoreEvent {
         this.eventId = eventId;
     }
 
+    /**
+    * This returns the position of the event in the "parent" stream.  Think of subscribing to a category stream
+     * or an event type stream here.  It is provided so you can save the position of the last successfully
+     * processed event in that stream.
+     */
     public int getPositionEventNumber() {
         return positionEventNumber;
     }
