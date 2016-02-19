@@ -102,6 +102,7 @@ public class EventStoreEventStore implements EventStore<Long> {
         return eventStoreEvent;
     }
 
+    @Deprecated
     @Override
     public void store(UUID aggregateId, long version, List<Event> events) {
         store(aggregateId, version, events, writeResult);
@@ -189,6 +190,7 @@ public class EventStoreEventStore implements EventStore<Long> {
         }
     }
 
+    @Deprecated
     @Override
     public Observable<EventStoreEvent> all() {
         return create((Observable.OnSubscribe<EventStoreEvent>) subscriber -> connection.subscribeToAllFrom(new SubscriptionObserver<IndexedEvent>() {
@@ -224,6 +226,7 @@ public class EventStoreEventStore implements EventStore<Long> {
         }, null, false, null));
     }
 
+    @Deprecated
     @Override
     public Observable<EventStoreEvent> streamFrom(String streamName) {
         return create((Observable.OnSubscribe<EventStoreEvent>) subscriber -> connection.subscribeToStreamFrom(streamName,
