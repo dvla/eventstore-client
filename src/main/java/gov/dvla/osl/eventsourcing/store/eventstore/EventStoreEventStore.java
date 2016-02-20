@@ -15,6 +15,7 @@ import eventstore.j.EventDataBuilder;
 import eventstore.j.WriteEventsBuilder;
 import eventstore.tcp.ConnectionActor;
 import gov.dvla.osl.eventsourcing.api.Sneak;
+import gov.dvla.osl.eventsourcing.impl.DefaultEventDeserialiser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
@@ -95,7 +96,7 @@ public class EventStoreEventStore implements EventStore<Long> {
         Class<? extends Event> type = (Class<? extends Event>) Class.forName(event.data().eventType());
         String json = new String(event.data().data().value().toArray(), UTF8);
         Event domainEvent = mapper.readValue(json, type);
-        EventStoreEvent eventStoreEvent = new EventStoreEvent();
+        EventStoreEvent eventStoreEvent = new EventStoreEvent(new DefaultEventDeserialiser());
         eventStoreEvent.setData(domainEvent.toString());
         eventStoreEvent.setEventNumber(event.number().value());
         return eventStoreEvent;

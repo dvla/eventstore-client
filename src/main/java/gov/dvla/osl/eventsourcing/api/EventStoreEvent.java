@@ -1,10 +1,5 @@
 package gov.dvla.osl.eventsourcing.api;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import gov.dvla.osl.eventsourcing.api.Event;
-
 import java.io.IOException;
 
 public class EventStoreEvent {
@@ -14,12 +9,10 @@ public class EventStoreEvent {
     private String eventId;
     private int positionEventNumber;
 
-    private ObjectMapper mapper;
+    private EventDeserialiser eventDeserialiser;
 
-    public EventStoreEvent() {
-        mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
+    public EventStoreEvent(EventDeserialiser eventDeserialiser) {
+        this.eventDeserialiser = eventDeserialiser;
     }
 
     public void setEventType(String eventType) {
@@ -31,8 +24,7 @@ public class EventStoreEvent {
     }
 
     public Event getEvent() throws ClassNotFoundException, IOException {
-        Class clazz = Class.forName(this.eventType);
-        return (Event) mapper.readValue(data, clazz);
+        return eventDeserialiser.deserialise(this.data, this.eventType);
     }
 
     public int getEventNumber() {
