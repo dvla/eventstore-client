@@ -1,6 +1,8 @@
 package gov.dvla.osl.eventsourcing.store.httpeventstore;
 
+import gov.dvla.osl.eventsourcing.api.EventDeserialiser;
 import gov.dvla.osl.eventsourcing.exception.EventStoreClientTechnicalException;
+import gov.dvla.osl.eventsourcing.impl.DefaultEventDeserialiser;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -26,6 +28,7 @@ public class EventStoreStream {
 
     private String stream;
     private boolean keepAlive;
+    private EventDeserialiser eventDeserialiser;
     private JSONObject payload;
     private boolean result;
     private List<EventStoreEvent> data;
@@ -33,9 +36,10 @@ public class EventStoreStream {
     private String mimetype;
     private boolean startLongPoll = false;
 
-    public EventStoreStream(String stream, boolean keepAlive) throws IOException {
+    public EventStoreStream(String stream, boolean keepAlive, EventDeserialiser eventDeserialiser ) throws IOException {
         this.stream = stream;
         this.keepAlive = keepAlive;
+        this.eventDeserialiser = eventDeserialiser;
         this.mimetype = "application/vnd.eventstore.atom+json";
     }
 
@@ -156,7 +160,7 @@ public class EventStoreStream {
 
         for (int i = entries.size() - 1; i > -1; i--) {
             JSONObject entry = (JSONObject) entries.get(i);
-            EventStoreEvent eventStoreEvent = new EventStoreEvent();
+            EventStoreEvent eventStoreEvent = new EventStoreEvent(eventDeserialiser);
             eventStoreEvent.setEventType(entry.get("eventType").toString());
             eventStoreEvent.setData(entry.get("data").toString());
             eventStoreEvent.setEventNumber(Integer.parseInt(entry.get("eventNumber").toString()));
