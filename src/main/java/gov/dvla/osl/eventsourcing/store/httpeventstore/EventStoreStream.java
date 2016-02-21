@@ -2,7 +2,6 @@ package gov.dvla.osl.eventsourcing.store.httpeventstore;
 
 import gov.dvla.osl.eventsourcing.api.EventDeserialiser;
 import gov.dvla.osl.eventsourcing.exception.EventStoreClientTechnicalException;
-import gov.dvla.osl.eventsourcing.impl.DefaultEventDeserialiser;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
