@@ -1,6 +1,6 @@
 package uk.gov.dvla.osl.memory;
 
-import uk.gov.dvla.osl.es.api.Event;
+import gov.dvla.osl.eventsourcing.api.Event;
 
 import java.util.UUID;
 
@@ -22,5 +22,10 @@ public class SomeEvent implements Event {
         this.forename = forename;
         this.surname = surname;
         this.email = email;
+    }
+
+    @Override
+    public UUID aggregateId() {
+        return driverId;
     }
 }
