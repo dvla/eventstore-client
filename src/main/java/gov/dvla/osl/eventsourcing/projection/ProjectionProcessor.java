@@ -1,6 +1,7 @@
 package gov.dvla.osl.eventsourcing.projection;
 
 import gov.dvla.osl.eventsourcing.api.EventDeserialiser;
+import gov.dvla.osl.eventsourcing.impl.DefaultEventDeserialiser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.EventStoreStream;
@@ -26,6 +27,16 @@ public class ProjectionProcessor {
      * Constructor.
      * @param streamUrl the streamUrl url eg. http://hostname:port/$ce-dealer
      * @param eventProcessor implementation of EventProcessor
+     */
+    public ProjectionProcessor(final String streamUrl, final EventProcessor eventProcessor) {
+        this(streamUrl, eventProcessor, new DefaultEventDeserialiser());
+    }
+
+    /**
+     * Constructor.
+     * @param streamUrl the streamUrl url eg. http://hostname:port/$ce-dealer
+     * @param eventProcessor implementation of EventProcessor
+     * @param eventDeserialiser implementation of EventDeserialiser
      */
     public ProjectionProcessor(final String streamUrl, final EventProcessor eventProcessor, final EventDeserialiser eventDeserialiser) {
         this.streamUrl = streamUrl;

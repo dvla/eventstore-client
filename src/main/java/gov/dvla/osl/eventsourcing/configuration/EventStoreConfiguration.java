@@ -32,6 +32,13 @@ public class EventStoreConfiguration {
     private int port = 1113;
 
     /**
+     * The stream.
+     */
+    @NotEmpty
+    @JsonProperty
+    private String stream;
+
+    /**
      * The user id.
      */
     @NotEmpty
@@ -67,9 +74,10 @@ public class EventStoreConfiguration {
      * @param userId the user id
      * @param password the password
      */
-    public EventStoreConfiguration(final String host, final int port, final String userId, final String password) {
+    public EventStoreConfiguration(final String host, final int port, final String stream, final String userId, final String password) {
         this.host = host;
         this.port = port;
+        this.stream = stream;
         this.userId = userId;
         this.password = password;
     }
@@ -88,6 +96,14 @@ public class EventStoreConfiguration {
      */
     public int getPort() {
         return port;
+    }
+
+    /**
+     * Get stream.
+     * @return stream
+     */
+    public String getStream() {
+        return "http://" + this.host + ":" + this.port + "/streams/" + this.stream;
     }
 
     /**
