@@ -22,7 +22,6 @@ public class InMemoryEventStoreTest {
         EventStream<Long> stream = es.loadEventsAfter(0L);
         assertEquals(1, countEvents(stream));
         Long id = stream.version();
-        System.out.println("id=" + id);
     }
 
     private int countEvents(EventStream<Long> stream) {
