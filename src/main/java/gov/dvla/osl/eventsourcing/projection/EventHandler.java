@@ -1,6 +1,8 @@
 package gov.dvla.osl.eventsourcing.projection;
 
 import gov.dvla.osl.eventsourcing.api.Event;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -13,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class EventHandler<T> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventHandler.class);
 
     private final Map<Class, MethodHandle> methodHandles = new HashMap<>();
 
@@ -31,10 +35,10 @@ public abstract class EventHandler<T> {
             try {
                 methodHandles.get(event.getClass()).invoke(this, event);
             } catch (Throwable throwable) {
-                throwable.printStackTrace();
+                LOGGER.error(throwable.getMessage(), throwable);
             }
         } else {
-            System.out.println("Handler not found for " + event.getClass().getCanonicalName());
+            LOGGER.info("Handler not found for " + event.getClass().getCanonicalName());
         }
     }
 
