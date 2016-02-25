@@ -76,10 +76,10 @@ public class EventStoreEventStore implements EventStore<Long> {
                 events.add(domainEvent);
             }
             return new ListEventStream(result.lastEventNumber().value(), events);
-        } catch (StreamNotFoundException e) {
+        } catch (StreamNotFoundException exception) {
             return new ListEventStream(-1, Collections.emptyList());
-        } catch (Exception e) {
-            throw Sneak.sneakyThrow(e);
+        } catch (Exception exception) {
+            throw Sneak.sneakyThrow(exception);
         }
     }
 
@@ -116,9 +116,9 @@ public class EventStoreEventStore implements EventStore<Long> {
 
         try {
             future.get(timeout, timeUnit);
-        } catch (InterruptedException|ExecutionException|TimeoutException e) {
-            logger.error(e.getMessage(), e);
-            throw new RuntimeException("Failed to store events to event store", e);
+        } catch (InterruptedException|ExecutionException|TimeoutException exception) {
+            logger.error(exception.getMessage(), exception);
+            throw new RuntimeException("Failed to store events to event store", exception);
         }
     }
 
@@ -141,8 +141,8 @@ public class EventStoreEventStore implements EventStore<Long> {
                     .eventId(UUID.randomUUID())
                     .jsonData(mapper.writeValueAsString(event))
                     .build();
-        } catch (JsonProcessingException e) {
-            throw Sneak.sneakyThrow(e);
+        } catch (JsonProcessingException exception) {
+            throw Sneak.sneakyThrow(exception);
         }
     }
 
@@ -206,16 +206,16 @@ public class EventStoreEventStore implements EventStore<Long> {
                     try {
                         logger.debug(event.toString());
                         subscriber.onNext(parseEvent(event.event()));
-                    } catch (Exception e) {
-                        logger.warn("Error when handling event", e);
+                    } catch (Exception exception) {
+                        logger.warn("Error when handling event", exception);
                     }
                 }
             }
 
             @Override
-            public void onError(Throwable e) {
-                logger.error(e.getMessage(), e);
-                subscriber.onError(e);
+            public void onError(Throwable exception) {
+                logger.error(exception.getMessage(), exception);
+                subscriber.onError(exception);
             }
 
             @Override
@@ -241,17 +241,17 @@ public class EventStoreEventStore implements EventStore<Long> {
             public void onEvent(eventstore.Event event, Closeable arg1) {
                 try {
                     subscriber.onNext(parseEvent(event));
-                } catch (ClassNotFoundException e) {
-                    logger.error(e.getMessage(), e);
-                } catch (IOException e) {
-                    logger.error(e.getMessage(), e);
+                } catch (ClassNotFoundException exception) {
+                    logger.error(exception.getMessage(), exception);
+                } catch (IOException exception) {
+                    logger.error(exception.getMessage(), exception);
                 }
             }
 
             @Override
-            public void onError(Throwable e) {
-                logger.error(e.getMessage(), e);
-                subscriber.onError(e);
+            public void onError(Throwable exception) {
+                logger.error(exception.getMessage(), exception);
+                subscriber.onError(exception);
             }
 
             @Override
