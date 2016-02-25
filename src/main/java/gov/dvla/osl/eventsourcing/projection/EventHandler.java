@@ -30,13 +30,9 @@ public abstract class EventHandler<T> {
                 .forEach(mapping -> methodHandles.put(mapping.clazz, mapping.methodHandle));
     }
 
-    public void handle(final Event event) {
+    public void handle(final Event event) throws Throwable {
         if (methodHandles.containsKey(event.getClass())) {
-            try {
-                methodHandles.get(event.getClass()).invoke(this, event);
-            } catch (Throwable throwable) {
-                LOGGER.error(throwable.getMessage(), throwable);
-            }
+            methodHandles.get(event.getClass()).invoke(this, event);
         } else {
             LOGGER.info("Handler not found for " + event.getClass().getCanonicalName());
         }
@@ -60,7 +56,6 @@ public abstract class EventHandler<T> {
                     method.getName(),
                     MethodType.methodType(void.class, method.getParameterTypes()[0]));
         } catch (NoSuchMethodException|IllegalAccessException e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -70,8 +65,8 @@ public abstract class EventHandler<T> {
         private final Class<T> clazz;
         private final MethodHandle methodHandle;
 
-        private HandlerMethodMapping(final Class<T> c, final MethodHandle method) {
-            this.clazz = c;
+        private HandlerMethodMapping(final Class<T> clazz, final MethodHandle method) {
+            this.clazz = clazz;
             this.methodHandle = method;
         }
     }

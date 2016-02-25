@@ -46,9 +46,9 @@ public class EventStoreStream {
         return Observable.create(subscribeFunction);
     }
 
-    Observable.OnSubscribe<EventStoreEvent> subscribeFunction = (s) -> {
+    Observable.OnSubscribe<EventStoreEvent> subscribeFunction = (sub) -> {
 
-        Subscriber subscriber = (Subscriber) s;
+        Subscriber subscriber = (Subscriber) sub;
 
         try {
             processData(subscriber);
@@ -220,7 +220,8 @@ public class EventStoreStream {
         }
 
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-        String inputLine, response = "";
+        String inputLine;
+        String response = "";
 
         while ((inputLine = in.readLine()) != null) {
             response = response + inputLine;
