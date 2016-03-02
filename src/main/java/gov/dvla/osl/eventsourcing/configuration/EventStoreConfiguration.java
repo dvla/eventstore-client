@@ -13,7 +13,6 @@ import javax.validation.constraints.Min;
  * event store connection parameters to be defined in the dropwizard configuration). This can be extended to include
  * other eventstore parameters later.
  *
- * @author Jeremy Prime
  */
 public class EventStoreConfiguration {
     /**
@@ -32,11 +31,26 @@ public class EventStoreConfiguration {
     private int port = 1113;
 
     /**
+     * The pageSize.
+     */
+    @Min(1)
+    @Max(50)
+    @JsonProperty
+    private int pageSize = 20;
+
+    /**
      * The stream.
      */
     @NotEmpty
     @JsonProperty
     private String stream;
+
+    /**
+     * The health check url.
+     */
+    @NotEmpty
+    @JsonProperty
+    private String healthcheckUrl;
 
     /**
      * The user id.
@@ -60,6 +74,9 @@ public class EventStoreConfiguration {
     @Max(10000)
     private int reconnectionAttempts = 1000;
 
+    @JsonProperty
+    private boolean keepAlive;
+
     /**
      * Constructor.
      */
@@ -74,10 +91,11 @@ public class EventStoreConfiguration {
      * @param userId the user id
      * @param password the password
      */
-    public EventStoreConfiguration(final String host, final int port, final String stream, final String userId, final String password) {
+    public EventStoreConfiguration(final String host, final int port, final String stream, final String healthcheckUrl, final String userId, final String password) {
         this.host = host;
         this.port = port;
         this.stream = stream;
+        this.healthcheckUrl = healthcheckUrl;
         this.userId = userId;
         this.password = password;
     }
@@ -103,7 +121,7 @@ public class EventStoreConfiguration {
      * @return stream
      */
     public String getStream() {
-        return "http://" + this.host + ":" + this.port + "/streams/" + this.stream;
+        return this.stream;
     }
 
     /**
@@ -129,5 +147,29 @@ public class EventStoreConfiguration {
      */
     public int getReconnectionAttempts() {
         return reconnectionAttempts;
+    }
+
+    public boolean isKeepAlive() {
+        return keepAlive;
+    }
+
+    public void setKeepAlive(boolean keepAlive) {
+        this.keepAlive = keepAlive;
+    }
+
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public String getHealthcheckUrl() {
+        return healthcheckUrl;
+    }
+
+    public void setHealthcheckUrl(String healthcheckUrl) {
+        this.healthcheckUrl = healthcheckUrl;
     }
 }

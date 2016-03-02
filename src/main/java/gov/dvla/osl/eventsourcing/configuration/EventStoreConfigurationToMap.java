@@ -6,7 +6,6 @@ import java.util.Map;
 /**
  * Configuration utility class.
  *
- * @author Jeremy Prime
  */
 public class EventStoreConfigurationToMap {
 

@@ -1,4 +1,4 @@
-package gov.dvla.osl.eventsourcing.projection;
+package gov.dvla.osl.eventsourcing.api;
 
 public interface ProjectionVersionService {
     int getNextVersionNumber();

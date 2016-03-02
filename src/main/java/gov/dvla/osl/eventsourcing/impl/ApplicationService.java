@@ -40,4 +40,3 @@ public class ApplicationService {
         return ctor.newInstance(command.aggregateId());
     }
 }
-
