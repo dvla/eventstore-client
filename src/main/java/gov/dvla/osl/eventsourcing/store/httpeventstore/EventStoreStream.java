@@ -1,6 +1,7 @@
 package gov.dvla.osl.eventsourcing.store.httpeventstore;
 
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
+import gov.dvla.osl.eventsourcing.exception.EventStoreClientTechnicalException;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Entry;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.EventStreamData;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Link;
@@ -35,7 +36,7 @@ public class EventStoreStream {
              return errors.flatMap(error -> {
                  if (error.hasThrowable())
                      logger.error("An error occurred processing the stream", error.getThrowable());
-                 return Observable.timer(configuration.getSecondsBeforeRetry(), TimeUnit.SECONDS);
+                 return Observable.timer(configuration.getProjectionConfiguration().getSecondsBeforeRetry(), TimeUnit.SECONDS);
              });
          });
     }
@@ -57,7 +58,7 @@ public class EventStoreStream {
 
     private void processData(Subscriber subscriber) throws Exception {
 
-        EventStreamData eventStreamData = getUrl(String.format("streams/%s/%d/forward/%d", configuration.getStream(), nextVersionNumber, configuration.getPageSize()), false);
+        EventStreamData eventStreamData = getUrl(String.format("streams/%s/%d/forward/%d", configuration.getProjectionConfiguration().getStream(), nextVersionNumber, configuration.getProjectionConfiguration().getPageSize()), false);
 
         String previous;
 
@@ -72,7 +73,7 @@ public class EventStoreStream {
             eventStreamData = getUrl(previous, false);
 
             while (eventStreamData.getEntries().size() == 0 && keepGoing) {
-                if (configuration.isKeepAlive()) {
+                if (configuration.getProjectionConfiguration().isKeepAlive()) {
                     eventStreamData = getUrl(previous, true);
                 } else {
                     subscriber.onCompleted();
@@ -99,7 +100,7 @@ public class EventStoreStream {
         Response<EventStreamData> response = eventStream.execute();
         if (response.isSuccess())
             return response.body();
-
-        return null;
+        else
+            throw new EventStoreClientTechnicalException(String.format("GET failed on %s with status %d", url, response.code()));
     }
 }

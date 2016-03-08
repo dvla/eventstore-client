@@ -5,15 +5,12 @@ import gov.dvla.osl.eventsourcing.api.ProjectionVersionService;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.EventStoreService;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.ServiceGenerator;
-import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.EventStoreStream;
-import rx.Observable;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.concurrent.TimeUnit;
 
 /**
  *

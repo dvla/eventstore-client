@@ -31,36 +31,6 @@ public class EventStoreConfiguration {
     private int port = 1113;
 
     /**
-     * The pageSize.
-     */
-    @Min(1)
-    @Max(50)
-    @JsonProperty
-    private int pageSize = 20;
-
-    /**
-     * The retry interval in seconds.
-     */
-    @Min(1)
-    @Max(60)
-    @JsonProperty
-    private int secondsBeforeRetry = 30;
-
-    /**
-     * The stream.
-     */
-    @NotEmpty
-    @JsonProperty
-    private String stream;
-
-    /**
-     * The health check url.
-     */
-    @NotEmpty
-    @JsonProperty
-    private String healthcheckUrl;
-
-    /**
      * The user id.
      */
     @NotEmpty
@@ -80,10 +50,11 @@ public class EventStoreConfiguration {
      */
     @Min(-1)
     @Max(10000)
+    @JsonProperty
     private int reconnectionAttempts = 1000;
 
     @JsonProperty
-    private boolean keepAlive;
+    private ProjectionConfiguration projection;
 
     /**
      * Constructor.
@@ -99,11 +70,9 @@ public class EventStoreConfiguration {
      * @param userId the user id
      * @param password the password
      */
-    public EventStoreConfiguration(final String host, final int port, final String stream, final String healthcheckUrl, final String userId, final String password) {
+    public EventStoreConfiguration(final String host, final int port, final String userId, final String password) {
         this.host = host;
         this.port = port;
-        this.stream = stream;
-        this.healthcheckUrl = healthcheckUrl;
         this.userId = userId;
         this.password = password;
     }
@@ -122,14 +91,6 @@ public class EventStoreConfiguration {
      */
     public int getPort() {
         return port;
-    }
-
-    /**
-     * Get stream.
-     * @return stream
-     */
-    public String getStream() {
-        return this.stream;
     }
 
     /**
@@ -157,35 +118,7 @@ public class EventStoreConfiguration {
         return reconnectionAttempts;
     }
 
-    public boolean isKeepAlive() {
-        return keepAlive;
-    }
-
-    public void setKeepAlive(boolean keepAlive) {
-        this.keepAlive = keepAlive;
-    }
-
-    public int getPageSize() {
-        return pageSize;
-    }
-
-    public void setPageSize(int pageSize) {
-        this.pageSize = pageSize;
-    }
-
-    public String getHealthcheckUrl() {
-        return healthcheckUrl;
-    }
-
-    public void setHealthcheckUrl(String healthcheckUrl) {
-        this.healthcheckUrl = healthcheckUrl;
-    }
-
-    public int getSecondsBeforeRetry() {
-        return secondsBeforeRetry;
-    }
-
-    public void setSecondsBeforeRetry(int secondsBeforeRetry) {
-        this.secondsBeforeRetry = secondsBeforeRetry;
+    public ProjectionConfiguration getProjectionConfiguration() {
+        return projection;
     }
 }
