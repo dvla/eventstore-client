@@ -30,9 +30,14 @@ public abstract class EventHandler<T> {
                 .forEach(mapping -> methodHandles.put(mapping.clazz, mapping.methodHandle));
     }
 
-    public void handle(final Event event) throws Throwable {
+    public void handle(final Event event) {
         if (methodHandles.containsKey(event.getClass())) {
-            methodHandles.get(event.getClass()).invoke(this, event);
+            try {
+                methodHandles.get(event.getClass()).invoke(this, event);
+            } catch (Throwable throwable) {
+                // If there is no handler we just ignore it.  We can't expect every projection handler to handle
+                // all event types.  They only need to handle the events they are interested in.
+            }
         } else {
             LOGGER.info("Handler not found for " + event.getClass().getCanonicalName());
         }

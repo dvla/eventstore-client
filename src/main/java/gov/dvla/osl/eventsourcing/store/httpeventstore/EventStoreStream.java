@@ -14,7 +14,6 @@ import rx.Subscriber;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class EventStoreStream {
 

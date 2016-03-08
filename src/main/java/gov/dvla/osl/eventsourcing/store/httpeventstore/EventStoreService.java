@@ -1,6 +1,7 @@
 package gov.dvla.osl.eventsourcing.store.httpeventstore;
 
 import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.EventStreamData;
+import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.HealthCheck;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
@@ -13,4 +14,7 @@ public interface EventStoreService {
 
     @GET()
     Call<EventStreamData> getEventStreamData(@Header("ES-LongPoll") String longPoll, @Url String url);
+
+    @GET("ping")
+    Call<HealthCheck> ping();
 }

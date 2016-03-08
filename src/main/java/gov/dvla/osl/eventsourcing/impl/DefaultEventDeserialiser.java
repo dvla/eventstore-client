@@ -5,8 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import gov.dvla.osl.eventsourcing.api.Event;
 import gov.dvla.osl.eventsourcing.api.EventDeserialiser;
-
-import java.io.IOException;
+import gov.dvla.osl.eventsourcing.exception.EventDeserialisationException;
 
 public class DefaultEventDeserialiser implements EventDeserialiser {
 
@@ -19,8 +18,14 @@ public class DefaultEventDeserialiser implements EventDeserialiser {
     }
 
     @Override
-    public Event deserialise(String data, String eventType) throws ClassNotFoundException, IOException {
-        Class clazz = Class.forName(eventType);
-        return (Event) mapper.readValue(data, clazz);
+    public Event deserialise(String data, String eventType)  {
+
+        Class clazz;
+        try {
+            clazz = Class.forName(eventType);
+            return (Event) mapper.readValue(data, clazz);
+        } catch (Exception e) {
+            throw new EventDeserialisationException(data, eventType, e);
+        }
     }
 }

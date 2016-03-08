@@ -5,7 +5,6 @@ import okhttp3.*;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
-import java.io.IOException;
 import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
