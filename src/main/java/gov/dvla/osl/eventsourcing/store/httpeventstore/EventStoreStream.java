@@ -12,8 +12,8 @@ import rx.Observable;
 import rx.Subscriber;
 
 import java.io.IOException;
-import java.net.ConnectException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class EventStoreStream {
 
@@ -31,7 +31,13 @@ public class EventStoreStream {
     }
 
     public Observable<Entry> readStreamEventsForward() {
-        return Observable.create(subscribeFunction);
+         return Observable.create(subscribeFunction).retryWhen(errors -> {
+             return errors.flatMap(error -> {
+                 if (error.hasThrowable())
+                     logger.error("An error occurred processing the stream", error.getThrowable());
+                 return Observable.timer(configuration.getSecondsBeforeRetry(), TimeUnit.SECONDS);
+             });
+         });
     }
 
     public void shutdown() {
@@ -86,20 +92,13 @@ public class EventStoreStream {
         return "";
     }
 
-    private EventStreamData getUrl(String url, boolean longPoll) {
+    private EventStreamData getUrl(String url, boolean longPoll) throws IOException {
 
         Call<EventStreamData> eventStream = service.getEventStreamData(longPoll ? "10" : null, url + "?embed=body");
 
-        Response<EventStreamData> response = null;
-
-        try {
-            response = eventStream.execute();
-            if (response.isSuccess()) return response.body();
-        } catch (ConnectException e) {
-            logger.error(e.getMessage());
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-        }
+        Response<EventStreamData> response = eventStream.execute();
+        if (response.isSuccess())
+            return response.body();
 
         return null;
     }

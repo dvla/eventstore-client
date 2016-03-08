@@ -39,6 +39,14 @@ public class EventStoreConfiguration {
     private int pageSize = 20;
 
     /**
+     * The retry interval in seconds.
+     */
+    @Min(1)
+    @Max(60)
+    @JsonProperty
+    private int secondsBeforeRetry = 30;
+
+    /**
      * The stream.
      */
     @NotEmpty
@@ -171,5 +179,13 @@ public class EventStoreConfiguration {
 
     public void setHealthcheckUrl(String healthcheckUrl) {
         this.healthcheckUrl = healthcheckUrl;
+    }
+
+    public int getSecondsBeforeRetry() {
+        return secondsBeforeRetry;
+    }
+
+    public void setSecondsBeforeRetry(int secondsBeforeRetry) {
+        this.secondsBeforeRetry = secondsBeforeRetry;
     }
 }
