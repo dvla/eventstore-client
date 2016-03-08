@@ -63,8 +63,8 @@ public class ProjectionProcessor {
         categoryStream.readStreamEventsForward().subscribe(
                 (event) -> {
                     try {
-                        if (eventProcessor.processEvent(event))
-                            projectionVersionService.saveProjectionVersion(event.getPositionEventNumber());
+                        eventProcessor.processEvent(event);
+                        projectionVersionService.saveProjectionVersion(event.getPositionEventNumber());
                     } catch (Exception e) {
                         LOGGER.error(e.getMessage(), e);
                     }
