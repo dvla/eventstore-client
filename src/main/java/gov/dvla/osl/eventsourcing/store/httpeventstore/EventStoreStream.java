@@ -58,29 +58,42 @@ public class EventStoreStream {
 
     private void processData(Subscriber subscriber) throws Exception {
 
-        EventStreamData eventStreamData = getUrl(String.format("streams/%s/%d/forward/%d", configuration.getProjectionConfiguration().getStream(), nextVersionNumber, configuration.getProjectionConfiguration().getPageSize()), false);
+        String headUrl = String.format("streams/%s/%d/forward/%d", configuration.getProjectionConfiguration().getStream(), nextVersionNumber, configuration.getProjectionConfiguration().getPageSize());
 
+        EventStreamData eventStreamData = getUrl(headUrl, false);
+
+        processEntries(eventStreamData.getEntries(), subscriber);
+
+        String lastLinkProcessed = headUrl;
         String previous;
 
         do {
-            for (int i = eventStreamData.getEntries().size() - 1; i > -1; i--) {
-                logger.debug("Calling subscriber.onNext with " + eventStreamData.getEntries().get(i).getEventType());
-                subscriber.onNext(eventStreamData.getEntries().get(i));
-            }
+            while (getPreviousLink(eventStreamData.getLinks()).equals("")) {
 
-            previous = getPreviousLink(eventStreamData.getLinks());
-
-            eventStreamData = getUrl(previous, false);
-
-            while (eventStreamData.getEntries().size() == 0 && keepGoing) {
                 if (configuration.getProjectionConfiguration().isKeepAlive()) {
-                    eventStreamData = getUrl(previous, true);
+                    eventStreamData = getUrl(lastLinkProcessed, true);
+                    processEntries(eventStreamData.getEntries(), subscriber);
                 } else {
                     subscriber.onCompleted();
                     return;
                 }
             }
+
+            previous = getPreviousLink(eventStreamData.getLinks());
+
+            eventStreamData = getUrl(previous, false);
+            processEntries(eventStreamData.getEntries(), subscriber);
+
+            lastLinkProcessed = previous;
+
         } while (keepGoing);
+    }
+
+    private void processEntries(List<Entry> entries, Subscriber subscriber) {
+        for (int i = entries.size() - 1; i > -1; i--) {
+            logger.debug("Calling subscriber.onNext with " + entries.get(i).getEventType());
+            subscriber.onNext(entries.get(i));
+        }
     }
 
     private String getPreviousLink(List<Link> links) {
@@ -95,7 +108,10 @@ public class EventStoreStream {
 
     private EventStreamData getUrl(String url, boolean longPoll) throws IOException {
 
-        Call<EventStreamData> eventStream = service.getEventStreamData(longPoll ? "10" : null, url + "?embed=body");
+        if (longPoll)
+            logger.info("Starting long-poll with value of " + configuration.getProjectionConfiguration().getLongPollSeconds());
+
+        Call<EventStreamData> eventStream = service.getEventStreamData(longPoll ? configuration.getProjectionConfiguration().getLongPollSeconds() : null, url + "?embed=body");
 
         Response<EventStreamData> response = eventStream.execute();
         if (response.isSuccess())

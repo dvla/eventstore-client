@@ -39,6 +39,14 @@ public class ProjectionConfiguration {
     private boolean keepAlive;
 
     /**
+     * The long poll length in seconds.
+     */
+    @Min(1)
+    @Max(60)
+    @JsonProperty
+    private String longPollSeconds = "30";
+
+    /**
      * Constructor.
      */
     public ProjectionConfiguration() {
@@ -86,5 +94,9 @@ public class ProjectionConfiguration {
 
     public void setSecondsBeforeRetry(int secondsBeforeRetry) {
         this.secondsBeforeRetry = secondsBeforeRetry;
+    }
+
+    public String getLongPollSeconds() {
+        return longPollSeconds;
     }
 }
