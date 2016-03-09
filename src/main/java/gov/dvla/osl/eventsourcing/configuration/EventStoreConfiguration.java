@@ -13,7 +13,6 @@ import javax.validation.constraints.Min;
  * event store connection parameters to be defined in the dropwizard configuration). This can be extended to include
  * other eventstore parameters later.
  *
- * @author Jeremy Prime
  */
 public class EventStoreConfiguration {
     /**
@@ -30,13 +29,6 @@ public class EventStoreConfiguration {
     @Max(65535)
     @JsonProperty
     private int port = 1113;
-
-    /**
-     * The stream.
-     */
-    @NotEmpty
-    @JsonProperty
-    private String stream;
 
     /**
      * The user id.
@@ -58,7 +50,11 @@ public class EventStoreConfiguration {
      */
     @Min(-1)
     @Max(10000)
+    @JsonProperty
     private int reconnectionAttempts = 1000;
+
+    @JsonProperty
+    private ProjectionConfiguration projection;
 
     /**
      * Constructor.
@@ -74,10 +70,9 @@ public class EventStoreConfiguration {
      * @param userId the user id
      * @param password the password
      */
-    public EventStoreConfiguration(final String host, final int port, final String stream, final String userId, final String password) {
+    public EventStoreConfiguration(final String host, final int port, final String userId, final String password) {
         this.host = host;
         this.port = port;
-        this.stream = stream;
         this.userId = userId;
         this.password = password;
     }
@@ -96,14 +91,6 @@ public class EventStoreConfiguration {
      */
     public int getPort() {
         return port;
-    }
-
-    /**
-     * Get stream.
-     * @return stream
-     */
-    public String getStream() {
-        return "http://" + this.host + ":" + this.port + "/streams/" + this.stream;
     }
 
     /**
@@ -129,5 +116,9 @@ public class EventStoreConfiguration {
      */
     public int getReconnectionAttempts() {
         return reconnectionAttempts;
+    }
+
+    public ProjectionConfiguration getProjectionConfiguration() {
+        return projection;
     }
 }

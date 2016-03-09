@@ -20,7 +20,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <rxjava.version>0.20.7</rxjava.version>
         <junit.version>4.12</junit.version>
-        <eventstore.api.version>1.1.0-SNAPSHOT</eventstore.api.version>
+        <eventstore.api.version>1.1.0</eventstore.api.version>
     </properties>
 
     <scm>
@@ -81,6 +81,16 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
             <version>5.2.2.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.retrofit2</groupId>
+            <artifactId>retrofit</artifactId>
+            <version>2.0.0-beta4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.retrofit2</groupId>
+            <artifactId>converter-jackson</artifactId>
+            <version>2.0.0-beta4</version>
         </dependency>
 
         <!-- Test dependencies -->

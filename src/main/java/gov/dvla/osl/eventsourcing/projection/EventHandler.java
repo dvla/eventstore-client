@@ -1,6 +1,7 @@
 package gov.dvla.osl.eventsourcing.projection;
 
 import gov.dvla.osl.eventsourcing.api.Event;
+import gov.dvla.osl.eventsourcing.exception.EventHandlerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,9 +31,14 @@ public abstract class EventHandler<T> {
                 .forEach(mapping -> methodHandles.put(mapping.clazz, mapping.methodHandle));
     }
 
-    public void handle(final Event event) throws Throwable {
+    public void handle(final Event event) throws EventHandlerException {
         if (methodHandles.containsKey(event.getClass())) {
-            methodHandles.get(event.getClass()).invoke(this, event);
+            MethodHandle methodHandle = methodHandles.get(event.getClass());
+            try {
+                methodHandle.invoke(this, event);
+            } catch (Throwable throwable) {
+                throw new EventHandlerException(event.getClass().getCanonicalName(), throwable);
+            }
         } else {
             LOGGER.info("Handler not found for " + event.getClass().getCanonicalName());
         }
@@ -49,13 +55,13 @@ public abstract class EventHandler<T> {
         }
     }
 
-    private final MethodHandle getMethodHandle(final Method method) {
+    private MethodHandle getMethodHandle(final Method method) {
         try {
-            return  MethodHandles.lookup().findVirtual(
+            return MethodHandles.lookup().findVirtual(
                     getGenericTypeClass(),
                     method.getName(),
                     MethodType.methodType(void.class, method.getParameterTypes()[0]));
-        } catch (NoSuchMethodException|IllegalAccessException e) {
+        } catch (NoSuchMethodException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }

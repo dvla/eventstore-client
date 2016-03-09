@@ -7,12 +7,9 @@ package gov.dvla.osl.eventsourcing.exception;
  *       this is a major refactor job.
  *       for this sprint we are throwing a runtime exception  - MS
  *
- * @author Martin Shadbolt
- * @since 1.0.0*
  */
 
 public class EventStoreClientTechnicalException extends RuntimeException {
-
     public EventStoreClientTechnicalException(String message) {
         super(message);
     }

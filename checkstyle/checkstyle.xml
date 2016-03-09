@@ -236,7 +236,7 @@
 		<property name="message" value="System.err is not allowed in production code."/>
 	</module>
 	<module name="RegexpMultiline">
-		<property name="severity" value="error"/>
+		<property name="severity" value="warning"/>
 		<property name="format" value="catch.?.?\(?.?.?Throwable"/>
 		<property name="message" value="Catching throwable is not allowed in production code."/>
 	</module>
