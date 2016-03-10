@@ -57,6 +57,12 @@ public class EventStoreConfiguration {
     private ProjectionConfiguration projection;
 
     /**
+     * The health check URL.
+     */
+    @JsonProperty
+    private String healthCheckUrl;
+
+    /**
      * Constructor.
      */
     public EventStoreConfiguration() {
@@ -120,5 +126,13 @@ public class EventStoreConfiguration {
 
     public ProjectionConfiguration getProjectionConfiguration() {
         return projection;
+    }
+
+    /**
+     * Get health check URL.
+     * @return health check URL
+     */
+    public String getHealthCheckUrl() {
+        return healthCheckUrl;
     }
 }
