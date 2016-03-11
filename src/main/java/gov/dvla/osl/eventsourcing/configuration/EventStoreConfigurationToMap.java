@@ -35,6 +35,11 @@ public class EventStoreConfigurationToMap {
     public static String EVENTSTORE_CONFIG_RECONNECTION_ATTEMPTS = "eventstore.max-reconnections";
 
     /**
+     * Health check URL
+     */
+    public static String EVENTSTORE_CONFIG_HEALTHCHECK_URL = "eventstore.healthcheck-url";
+
+    /**
      * Config.
      */
     private final EventStoreConfiguration config;
@@ -58,6 +63,7 @@ public class EventStoreConfigurationToMap {
         mapped.put(EVENTSTORE_CONFIG_USERID, config.getUserId());
         mapped.put(EVENTSTORE_CONFIG_PASSWORD, config.getPassword());
         mapped.put(EVENTSTORE_CONFIG_RECONNECTION_ATTEMPTS, config.getReconnectionAttempts());
+        mapped.put(EVENTSTORE_CONFIG_HEALTHCHECK_URL, config.getHealthCheckUrl());
         return mapped;
     }
 }
