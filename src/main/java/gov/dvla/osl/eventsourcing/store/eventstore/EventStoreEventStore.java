@@ -1,44 +1,73 @@
 package gov.dvla.osl.eventsourcing.store.eventstore;
 
 
-import akka.actor.*;
+import java.io.Closeable;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
+import akka.actor.Props;
+import akka.actor.Status;
+import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import eventstore.*;
+
+import eventstore.EsException;
+import eventstore.EventData;
+import eventstore.IndexedEvent;
+import eventstore.ReadStreamEventsCompleted;
+import eventstore.Settings;
+import eventstore.StreamNotFoundException;
+import eventstore.SubscriptionObserver;
+import eventstore.WriteEventsCompleted;
 import eventstore.j.EsConnection;
 import eventstore.j.EsConnectionFactory;
 import eventstore.j.EventDataBuilder;
 import eventstore.j.WriteEventsBuilder;
 import eventstore.tcp.ConnectionActor;
-import gov.dvla.osl.eventsourcing.api.Sneak;
-import gov.dvla.osl.eventsourcing.impl.DefaultEventDeserialiser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import rx.Observable;
-import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
-import gov.dvla.osl.eventsourcing.api.EventStoreEvent;
 import gov.dvla.osl.eventsourcing.api.Event;
+import gov.dvla.osl.eventsourcing.api.EventStoreEvent;
+import gov.dvla.osl.eventsourcing.api.Sneak;
+import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
+import gov.dvla.osl.eventsourcing.configuration.EventStoreConfigurationToMap;
+import gov.dvla.osl.eventsourcing.impl.DefaultEventDeserialiser;
 import gov.dvla.osl.eventsourcing.store.memory.EventStore;
 import gov.dvla.osl.eventsourcing.store.memory.ListEventStream;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import rx.Observable;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
+
 
 import static rx.Observable.create;
 
+/**
+ * Eventstore implementation pointing to an actual instance of eventstore, via the eventstore
+ * JVM client.
+ */
 public class EventStoreEventStore implements EventStore<Long> {
-    private static final Logger logger = LoggerFactory.getLogger(EventStoreEventStore.class);
+
+    /**
+     * Logger for this class.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventStoreEventStore.class);
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
@@ -49,16 +78,31 @@ public class EventStoreEventStore implements EventStore<Long> {
     private final ObjectMapper mapper;
     private final EsConnection connection;
 
-    public EventStoreEventStore(String streamPrefix, ObjectMapper mapper, final Map overrides) {
+    /**
+     * Standard constructor
+     * @param streamPrefix - prefix for the stream to read/write
+     * @param mapper - object mapper which we will use for encoding events
+     * @param config - configuration object for the eventstore client
+     */
+    public EventStoreEventStore(final String streamPrefix, final ObjectMapper mapper,
+                                final EventStoreConfiguration config) {
         this.streamPrefix = streamPrefix;
         this.mapper = mapper;
+
+        final Map<String, Object> overrides = new EventStoreConfigurationToMap(config).asMap();
 
         // Get default configuration by applying standard approach
         final Config akkaConfig = ConfigFactory.load();
         // Override with supplied config where appropriate
-        final Config combined = overrides != null ? ConfigFactory.parseMap(overrides).withFallback(akkaConfig) : akkaConfig;
+        final Config combined;
+        if (overrides != null) {
+            combined = ConfigFactory.parseMap(overrides).withFallback(akkaConfig);
+        } else {
+            combined = akkaConfig;
+        }
 
-        this.system = ActorSystem.create("default", combined); // Retained "default" as name to ensure same basic behaviour as previous version
+        // Retained "default" as name to ensure same basic behaviour as previous version
+        this.system = ActorSystem.create("default", combined);
 
         connectionActor = system.actorOf(ConnectionActor.getProps(Settings.apply(combined)));
         writeResult = system.actorOf(Props.create(WriteResult.class));
@@ -117,7 +161,7 @@ public class EventStoreEventStore implements EventStore<Long> {
         try {
             future.get(timeout, timeUnit);
         } catch (InterruptedException|ExecutionException|TimeoutException exception) {
-            logger.error(exception.getMessage(), exception);
+            LOGGER.error(exception.getMessage(), exception);
             throw new RuntimeException("Failed to store events to event store", exception);
         }
     }
@@ -197,30 +241,30 @@ public class EventStoreEventStore implements EventStore<Long> {
 
             @Override
             public void onLiveProcessingStart(Closeable arg0) {
-                logger.info("live processing started");
+                LOGGER.info("live processing started");
             }
 
             @Override
             public void onEvent(IndexedEvent event, Closeable arg1) {
                 if (!event.event().streamId().isSystem() && event.event().streamId().streamId().startsWith("driver")) {
                     try {
-                        logger.debug(event.toString());
+                        LOGGER.debug(event.toString());
                         subscriber.onNext(parseEvent(event.event()));
                     } catch (Exception exception) {
-                        logger.warn("Error when handling event", exception);
+                        LOGGER.warn("Error when handling event", exception);
                     }
                 }
             }
 
             @Override
             public void onError(Throwable exception) {
-                logger.error(exception.getMessage(), exception);
+                LOGGER.error(exception.getMessage(), exception);
                 subscriber.onError(exception);
             }
 
             @Override
             public void onClose() {
-                logger.error("subscription closed");
+                LOGGER.error("subscription closed");
                 subscriber.onCompleted();
             }
         }, null, false, null));
@@ -234,7 +278,7 @@ public class EventStoreEventStore implements EventStore<Long> {
 
             @Override
             public void onLiveProcessingStart(Closeable arg0) {
-                logger.info("live processing started");
+                LOGGER.info("live processing started");
             }
 
             @Override
@@ -242,21 +286,21 @@ public class EventStoreEventStore implements EventStore<Long> {
                 try {
                     subscriber.onNext(parseEvent(event));
                 } catch (ClassNotFoundException exception) {
-                    logger.error(exception.getMessage(), exception);
+                    LOGGER.error(exception.getMessage(), exception);
                 } catch (IOException exception) {
-                    logger.error(exception.getMessage(), exception);
+                    LOGGER.error(exception.getMessage(), exception);
                 }
             }
 
             @Override
             public void onError(Throwable exception) {
-                logger.error(exception.getMessage(), exception);
+                LOGGER.error(exception.getMessage(), exception);
                 subscriber.onError(exception);
             }
 
             @Override
             public void onClose() {
-                logger.error("subscription closed");
+                LOGGER.error("subscription closed");
                 subscriber.onCompleted();
             }
         }, 0, false, null));
