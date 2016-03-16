@@ -1,16 +1,19 @@
 package gov.dvla.osl.eventsourcing.projection;
 
 import gov.dvla.osl.eventsourcing.api.EventProcessor;
-import gov.dvla.osl.eventsourcing.api.ProjectionVersionService;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.EventStoreService;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.ServiceGenerator;
+import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.EventStoreStream;
+import rx.Observable;
+import rx.functions.Func0;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -24,7 +27,6 @@ public class ProjectionProcessor {
 
     private EventStoreConfiguration configuration;
     private EventProcessor eventProcessor;
-    private ProjectionVersionService projectionVersionService;
     private EventStoreStream categoryStream;
 
     /**
@@ -34,11 +36,9 @@ public class ProjectionProcessor {
      * @param eventProcessor implementation of EventProcessor
      */
     public ProjectionProcessor(final EventStoreConfiguration configuration,
-                               final EventProcessor eventProcessor,
-                               final ProjectionVersionService projectionVersionService) {
+                               final EventProcessor eventProcessor) {
         this.configuration = configuration;
         this.eventProcessor = eventProcessor;
-        this.projectionVersionService = projectionVersionService;
     }
 
     /**
@@ -49,22 +49,26 @@ public class ProjectionProcessor {
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
-    public void projectEvents() throws IOException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-
-        int nextVersionNumber = projectionVersionService.getNextVersionNumber();
+    public void projectEvents(Func0<Integer> getNextVersionNumber) throws IOException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
 
         EventStoreService eventService = ServiceGenerator.createService(EventStoreService.class, this.configuration);
 
-        categoryStream = new EventStoreStream(eventService, this.configuration, nextVersionNumber);
+        categoryStream = new EventStoreStream(eventService, this.configuration);
 
-        categoryStream.readStreamEventsForward().subscribe(
+        categoryStream.readStreamEventsForward(getNextVersionNumber).retryWhen(errors -> {
+            return errors.flatMap(error -> {
+                if (error.hasThrowable())
+                    LOGGER.error("An error occurred processing the stream", error.getThrowable());
+                return Observable.timer(configuration.getProjectionConfiguration().getSecondsBeforeRetry(), TimeUnit.SECONDS);
+            });
+        }).subscribe(
                 (event) -> {
-                    try {
+//                    try {
                         eventProcessor.processEvent(event);
-                        projectionVersionService.saveProjectionVersion(event.getPositionEventNumber());
-                    } catch (Exception e) {
-                        LOGGER.error(e.getMessage(), e);
-                    }
+//                    } catch (Exception e) {
+//                        LOGGER.error(e.getMessage(), e);
+//                        throw e;
+//                    }
                 },
                 (error) -> {
                     LOGGER.error(error.getMessage(), error);
