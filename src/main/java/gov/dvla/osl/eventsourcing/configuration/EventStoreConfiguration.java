@@ -1,20 +1,41 @@
 package gov.dvla.osl.eventsourcing.configuration;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hibernate.validator.constraints.NotEmpty;
-
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+
+import org.hibernate.validator.constraints.NotEmpty;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * The event store configuration.
  *
- * A wrapper so we can inject dropwizard configuration for eventstore into akka configuration (we really want the
- * event store connection parameters to be defined in the dropwizard configuration). This can be extended to include
- * other eventstore parameters later.
+ * A wrapper so we can inject dropwizard configuration for eventstore into akka configuration (we
+ * really want the event store connection parameters to be defined in the dropwizard configuration).
+ * This can be extended to include other eventstore parameters later.
  *
  */
 public class EventStoreConfiguration {
+
+    /**
+     * Maximum value for port.
+     */
+    private static final int MAX_PORT = 65535;
+
+    /**
+     * Default value for port.
+     */
+    private static final int DEFAULT_PORT = 1113;
+
+    /**
+     * Maximum number for the reconnect attempts.
+     */
+    private static final int MAX_RECONNECT_ATTEMPTS = 10000;
+
+    /**
+     * Default value for the reconnect attempts value.
+     */
+    private static final int DEFAULT_RECONNECT_ATTEMPTS = 1000;
     /**
      * The host.
      */
@@ -26,9 +47,9 @@ public class EventStoreConfiguration {
      * The port.
      */
     @Min(1)
-    @Max(65535)
+    @Max(MAX_PORT)
     @JsonProperty
-    private int port = 1113;
+    private int port = DEFAULT_PORT;
 
     /**
      * The user id.
@@ -45,14 +66,17 @@ public class EventStoreConfiguration {
     private String password;
 
     /**
-     * Maxinum number of reconnection attempts for the eventstore client before it backs out
+     * Maxinum number of reconnection attempts for the eventstore client before it backs out.
      * reconnecting following connection loss
      */
     @Min(-1)
-    @Max(10000)
+    @Max(MAX_RECONNECT_ATTEMPTS)
     @JsonProperty
-    private int reconnectionAttempts = 1000;
+    private int reconnectionAttempts = DEFAULT_RECONNECT_ATTEMPTS;
 
+    /**
+     * Projection configuration.
+     */
     @JsonProperty
     private ProjectionConfiguration projection;
 
@@ -61,6 +85,12 @@ public class EventStoreConfiguration {
      */
     @JsonProperty
     private String healthCheckUrl;
+
+    /**
+     * Cluster configuration (optional but needed if we want to talk to an eventstore cluster).
+     */
+    @JsonProperty
+    private EventStoreClusterConfiguration cluster;
 
     /**
      * Constructor.
@@ -76,7 +106,8 @@ public class EventStoreConfiguration {
      * @param userId the user id
      * @param password the password
      */
-    public EventStoreConfiguration(final String host, final int port, final String userId, final String password) {
+    public EventStoreConfiguration(final String host, final int port, final String userId,
+                                   final String password) {
         this.host = host;
         this.port = port;
         this.userId = userId;
@@ -117,13 +148,17 @@ public class EventStoreConfiguration {
 
     /**
      * Get maximum number of reconnection attempts to make to an eventstore server in the event
-     * of a connection loss
+     * of a connection loss.
      * @return max reconnection attempts
      */
     public int getReconnectionAttempts() {
         return reconnectionAttempts;
     }
 
+    /**
+     * Retrieve the projection configuration.
+     * @return the projection configuration
+     */
     public ProjectionConfiguration getProjectionConfiguration() {
         return projection;
     }
@@ -134,5 +169,21 @@ public class EventStoreConfiguration {
      */
     public String getHealthCheckUrl() {
         return healthCheckUrl;
+    }
+
+    /**
+     * Return the eventstore cluster configuration.
+     * @return eventstore cluster configuration
+     */
+    public EventStoreClusterConfiguration getCluster() {
+        return cluster;
+    }
+
+    /**
+     * Set the eventstore cluster configuration.
+     * @param cluster - the new cluster configuration
+     */
+    public void setCluster(EventStoreClusterConfiguration cluster) {
+        this.cluster = cluster;
     }
 }
