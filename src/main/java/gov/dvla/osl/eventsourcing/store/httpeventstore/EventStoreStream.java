@@ -11,10 +11,10 @@ import retrofit2.Call;
 import retrofit2.Response;
 import rx.Observable;
 import rx.Subscriber;
+import rx.functions.Func0;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class EventStoreStream {
 
@@ -25,20 +25,14 @@ public class EventStoreStream {
     private EventStoreService service;
     private boolean keepGoing = true;
 
-    public EventStoreStream(EventStoreService service, EventStoreConfiguration configuration, int nextVersionNumber) throws IOException {
+    public EventStoreStream(EventStoreService service, EventStoreConfiguration configuration) throws IOException {
         this.configuration = configuration;
-        this.nextVersionNumber = nextVersionNumber;
         this.service = service;
     }
 
-    public Observable<Entry> readStreamEventsForward() {
-         return Observable.create(subscribeFunction).retryWhen(errors -> {
-             return errors.flatMap(error -> {
-                 if (error.hasThrowable())
-                     logger.error("An error occurred processing the stream", error.getThrowable());
-                 return Observable.timer(configuration.getProjectionConfiguration().getSecondsBeforeRetry(), TimeUnit.SECONDS);
-             });
-         });
+    public Observable<Entry> readStreamEventsForward(Func0<Integer> getNextVersionNumber) {
+        nextVersionNumber = getNextVersionNumber.call();
+         return Observable.create(subscribeFunction);
     }
 
     public void shutdown() {
