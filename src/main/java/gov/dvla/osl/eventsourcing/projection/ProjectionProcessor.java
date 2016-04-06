@@ -64,7 +64,11 @@ public class ProjectionProcessor {
         }).subscribe(
                 (event) -> {
 //                    try {
+                    if(event.getEventNumber()!=null) {
                         eventProcessor.processEvent(event);
+                    } else {
+                        LOGGER.warn("Event with ID [{}] does not have an event number.", event.getId());
+                    }
 //                    } catch (Exception e) {
 //                        LOGGER.error(e.getMessage(), e);
 //                        throw e;
