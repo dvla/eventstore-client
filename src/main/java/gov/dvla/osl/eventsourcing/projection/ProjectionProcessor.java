@@ -62,22 +62,15 @@ public class ProjectionProcessor {
                 return Observable.timer(configuration.getProjectionConfiguration().getSecondsBeforeRetry(), TimeUnit.SECONDS);
             });
         }).subscribe(
-                (event) -> {
-//                    try {
-                    if(event.getEventNumber()!=null) {
-                        eventProcessor.processEvent(event);
-                    } else {
-                        LOGGER.warn("Event with ID [{}] does not have an event number.", event.getId());
-                    }
-//                    } catch (Exception e) {
-//                        LOGGER.error(e.getMessage(), e);
-//                        throw e;
-//                    }
-                },
-                (error) -> {
-                    LOGGER.error(error.getMessage(), error);
-                },
-                () -> LOGGER.debug("Dealer projection finished")
+            (event) -> {
+                if(event.getEventNumber()!=null) {
+                    eventProcessor.processEvent(event);
+                }
+            },
+            (error) -> {
+                LOGGER.error(error.getMessage(), error);
+            },
+            () -> LOGGER.debug("Dealer projection finished")
         );
     }
 
