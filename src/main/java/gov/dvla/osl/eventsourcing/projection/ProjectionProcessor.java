@@ -25,6 +25,12 @@ public class ProjectionProcessor {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ProjectionProcessor.class);
 
+    /**
+     * If an event stream is soft deleted then the event type is labelled "$metadata".  Ensure
+     * these events are not processed.
+     */
+    private static final String SOFT_DELETED_EVENT_TYPE = "$metadata";
+
     private EventStoreConfiguration configuration;
     private EventProcessor eventProcessor;
     private EventStoreStream categoryStream;
@@ -63,7 +69,7 @@ public class ProjectionProcessor {
             });
         }).subscribe(
             (event) -> {
-                if(event.getEventNumber()!=null) {
+                if(event.getEventNumber()!=null && event.getEventType()!=null && !event.getEventType().equals(SOFT_DELETED_EVENT_TYPE)) {
                     eventProcessor.processEvent(event);
                 }
             },
