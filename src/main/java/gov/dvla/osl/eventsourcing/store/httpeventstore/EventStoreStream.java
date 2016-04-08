@@ -86,7 +86,10 @@ public class EventStoreStream {
     private void processEntries(List<Entry> entries, Subscriber subscriber) {
         for (int i = entries.size() - 1; i > -1; i--) {
             logger.debug("Calling subscriber.onNext with " + entries.get(i).getEventType());
-            subscriber.onNext(entries.get(i));
+            Entry entry = entries.get(i);
+            if(entry!=null) {
+                subscriber.onNext(entries.get(i));
+            }
         }
     }
 
