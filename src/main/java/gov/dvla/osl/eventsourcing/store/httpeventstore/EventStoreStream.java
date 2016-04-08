@@ -88,7 +88,7 @@ public class EventStoreStream {
             logger.debug("Calling subscriber.onNext with " + entries.get(i).getEventType());
             Entry entry = entries.get(i);
             if(entry!=null) {
-                subscriber.onNext(entries.get(i));
+                subscriber.onNext(entry);
             }
         }
     }
