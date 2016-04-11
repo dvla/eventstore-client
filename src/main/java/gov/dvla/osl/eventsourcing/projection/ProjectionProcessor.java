@@ -4,7 +4,6 @@ import gov.dvla.osl.eventsourcing.api.EventProcessor;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.EventStoreService;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.ServiceGenerator;
-import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.EventStoreStream;
@@ -59,7 +58,7 @@ public class ProjectionProcessor {
 
         EventStoreService eventService = ServiceGenerator.createService(EventStoreService.class, this.configuration);
 
-        categoryStream = new EventStoreStream(eventService, this.configuration);
+        categoryStream = new EventStoreStream(eventService, this.configuration, mapper);
 
         categoryStream.readStreamEventsForward(getNextVersionNumber).retryWhen(errors -> {
             return errors.flatMap(error -> {
