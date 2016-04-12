@@ -15,10 +15,9 @@ public interface EventStoreService {
 
     @GET("ping")
     Call<HealthCheck> ping();
-
     @Headers({"Content-Type:application/vnd.eventstore.events+json"})
-    @POST(value = "/streams/{streamId}")
+    @POST(value = "/streams/{streamName}")
     Call<Void> postEvents(@Header("ES-ExpectedVersion") long expectedVersion,
-                          @Path("streamId") final String streamId,
+                          @Path("streamName") final String streamName,
                           @Body final List<AddEventRequest> listOfEvents);
 }

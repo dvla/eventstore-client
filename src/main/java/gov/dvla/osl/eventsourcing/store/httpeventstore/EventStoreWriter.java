@@ -4,11 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.dvla.osl.eventsourcing.api.Event;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
+import gov.dvla.osl.eventsourcing.exception.EventStoreClientTechnicalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+
 
 import java.io.IOException;
 import java.util.List;
@@ -18,35 +17,43 @@ import java.util.stream.Collectors;
 public class EventStoreWriter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventStoreWriter.class);
+    private static final String WRITING_EVENT_ERROR = "Error in Writing event to event store";
+
 
     private EventStoreConfiguration configuration;
     private final ObjectMapper mapper;
+
 
     public EventStoreWriter(EventStoreConfiguration configuration,
             final ObjectMapper mapper) {
 
         this.configuration = configuration;
         this.mapper = mapper;
+
+
     }
 
     public void writeEvents(String streamName, long expectedVersion, List<Event> events) throws IOException {
 
         EventStoreService eventService = ServiceGenerator.createService(EventStoreService.class, this.configuration);
 
+
         List<AddEventRequest> addEventRequests = events.stream()
                 .map(this::constructEventRequest)
                 .collect(Collectors.toList());
+        try{
 
-        eventService.postEvents(expectedVersion, streamName, addEventRequests).enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-            }
+            final retrofit2.Response<Void> writhingEventsResponse = eventService.postEvents(expectedVersion, streamName, addEventRequests).execute();
 
-            @Override
-            public void onFailure(Call<Void> call, Throwable throwable) {
-                LOGGER.error(throwable.getMessage(), throwable);
+            if (!writhingEventsResponse.isSuccess()) {
+                LOGGER.error(WRITING_EVENT_ERROR );
+                throw new EventStoreClientTechnicalException(WRITING_EVENT_ERROR);
             }
-        });
+        } catch (IOException e) {
+            LOGGER.error(WRITING_EVENT_ERROR  + ": "
+                    + e.getMessage());
+            throw new RuntimeException(WRITING_EVENT_ERROR );
+        }
     }
 
     private AddEventRequest constructEventRequest(Event event) {
