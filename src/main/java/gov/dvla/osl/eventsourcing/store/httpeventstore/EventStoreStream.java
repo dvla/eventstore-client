@@ -1,8 +1,5 @@
 package gov.dvla.osl.eventsourcing.store.httpeventstore;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.dvla.osl.eventsourcing.api.Event;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
 import gov.dvla.osl.eventsourcing.exception.EventStoreClientTechnicalException;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Entry;
@@ -11,7 +8,6 @@ import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Link;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 import rx.Observable;
 import rx.Subscriber;
@@ -19,8 +15,6 @@ import rx.functions.Func0;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class EventStoreStream {
 
@@ -30,9 +24,7 @@ public class EventStoreStream {
     private int nextVersionNumber;
     private EventStoreService service;
     private boolean keepGoing = true;
-    private final ObjectMapper mapper;
 
-    public EventStoreStream(EventStoreService service, EventStoreConfiguration configuration, ObjectMapper mapper) throws IOException {
     /**
      * If an event stream is hard deleted then the event type is labelled "$metadata".  Ensure
      * these events are not processed.
@@ -42,27 +34,6 @@ public class EventStoreStream {
     public EventStoreStream(EventStoreService service, EventStoreConfiguration configuration) throws IOException {
         this.configuration = configuration;
         this.service = service;
-        this.mapper = mapper;
-    }
-
-    public void store(String streamName, long version, List<Event> events) {
-
-        EventStoreService eventService = ServiceGenerator.createService(EventStoreService.class, this.configuration);
-
-        List<AddEventRequest> addEventRequests = events.stream()
-                .map(this::constructEventRequest)
-                .collect(Collectors.toList());
-
-        eventService.postEvents(version, streamName, addEventRequests).enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-            }
-
-            @Override
-            public void onFailure(Call<Void> call, Throwable throwable) {
-                LOGGER.error(throwable.getMessage(), throwable);
-            }
-        });
     }
 
     public Observable<Entry> readStreamEventsForward(Func0<Integer> getNextVersionNumber) {
@@ -151,19 +122,5 @@ public class EventStoreStream {
             return response.body();
         else
             throw new EventStoreClientTechnicalException(String.format("GET failed on %s with status %d", url, response.code()));
-    }
-
-    private AddEventRequest constructEventRequest(Event event) {
-
-        AddEventRequest addEventRequest = null;
-        try {
-            addEventRequest = new AddEventRequest(UUID.randomUUID(),
-                    event.getClass().getTypeName(),
-                    mapper.writeValueAsString(event));
-        } catch (JsonProcessingException e) {
-            LOGGER.error(e.toString(), e);
-        }
-
-        return addEventRequest;
     }
 }

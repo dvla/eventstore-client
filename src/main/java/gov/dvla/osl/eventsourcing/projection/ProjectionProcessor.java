@@ -1,6 +1,5 @@
 package gov.dvla.osl.eventsourcing.projection;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.dvla.osl.eventsourcing.api.EventProcessor;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.EventStoreService;
@@ -28,7 +27,6 @@ public class ProjectionProcessor {
     private EventStoreConfiguration configuration;
     private EventProcessor eventProcessor;
     private EventStoreStream categoryStream;
-    private final ObjectMapper mapper;
 
     /**
      * Constructor.
@@ -40,8 +38,6 @@ public class ProjectionProcessor {
                                final EventProcessor eventProcessor) {
         this.configuration = configuration;
         this.eventProcessor = eventProcessor;
-        this.mapper = new ObjectMapper();
-
     }
 
     /**
@@ -56,7 +52,7 @@ public class ProjectionProcessor {
 
         EventStoreService eventService = ServiceGenerator.createService(EventStoreService.class, this.configuration);
 
-        categoryStream = new EventStoreStream(eventService, this.configuration, mapper);
+        categoryStream = new EventStoreStream(eventService, this.configuration);
 
         categoryStream.readStreamEventsForward(getNextVersionNumber).retryWhen(errors -> {
             return errors.flatMap(error -> {
