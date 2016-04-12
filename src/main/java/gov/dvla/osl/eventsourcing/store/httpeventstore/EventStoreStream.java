@@ -1,5 +1,8 @@
 package gov.dvla.osl.eventsourcing.store.httpeventstore;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.dvla.osl.eventsourcing.api.Event;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
 import gov.dvla.osl.eventsourcing.exception.EventStoreClientTechnicalException;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Entry;
@@ -8,6 +11,7 @@ import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Link;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 import rx.Observable;
 import rx.Subscriber;
@@ -15,16 +19,20 @@ import rx.functions.Func0;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class EventStoreStream {
 
-    private static final Logger logger = LoggerFactory.getLogger(EventStoreStream.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventStoreStream.class);
 
     private EventStoreConfiguration configuration;
     private int nextVersionNumber;
     private EventStoreService service;
     private boolean keepGoing = true;
+    private final ObjectMapper mapper;
 
+    public EventStoreStream(EventStoreService service, EventStoreConfiguration configuration, ObjectMapper mapper) throws IOException {
     /**
      * If an event stream is hard deleted then the event type is labelled "$metadata".  Ensure
      * these events are not processed.
@@ -34,6 +42,27 @@ public class EventStoreStream {
     public EventStoreStream(EventStoreService service, EventStoreConfiguration configuration) throws IOException {
         this.configuration = configuration;
         this.service = service;
+        this.mapper = mapper;
+    }
+
+    public void store(String streamName, long version, List<Event> events) {
+
+        EventStoreService eventService = ServiceGenerator.createService(EventStoreService.class, this.configuration);
+
+        List<AddEventRequest> addEventRequests = events.stream()
+                .map(this::constructEventRequest)
+                .collect(Collectors.toList());
+
+        eventService.postEvents(version, streamName, addEventRequests).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable throwable) {
+                LOGGER.error(throwable.getMessage(), throwable);
+            }
+        });
     }
 
     public Observable<Entry> readStreamEventsForward(Func0<Integer> getNextVersionNumber) {
@@ -94,7 +123,7 @@ public class EventStoreStream {
         for (int i = entries.size() - 1; i > -1; i--) {
             Entry entry = entries.get(i);
             if (entry != null && entry.getEventNumber() != null && entry.getEventType() != null && !entry.getEventType().equals(HARD_DELETED_EVENT_TYPE)) {
-                logger.debug("Calling subscriber.onNext with " + entries.get(i).getEventType());
+                LOGGER.debug("Calling subscriber.onNext with " + entries.get(i).getEventType());
                 subscriber.onNext(entry);
             }
         }
@@ -113,7 +142,7 @@ public class EventStoreStream {
     private EventStreamData getUrl(String url, boolean longPoll) throws IOException {
 
         if (longPoll)
-            logger.info("Starting long-poll with value of " + configuration.getProjectionConfiguration().getLongPollSeconds());
+            LOGGER.info("Starting long-poll with value of " + configuration.getProjectionConfiguration().getLongPollSeconds());
 
         Call<EventStreamData> eventStream = service.getEventStreamData(longPoll ? configuration.getProjectionConfiguration().getLongPollSeconds() : null, url + "?embed=body");
 
@@ -122,5 +151,19 @@ public class EventStoreStream {
             return response.body();
         else
             throw new EventStoreClientTechnicalException(String.format("GET failed on %s with status %d", url, response.code()));
+    }
+
+    private AddEventRequest constructEventRequest(Event event) {
+
+        AddEventRequest addEventRequest = null;
+        try {
+            addEventRequest = new AddEventRequest(UUID.randomUUID(),
+                    event.getClass().getTypeName(),
+                    mapper.writeValueAsString(event));
+        } catch (JsonProcessingException e) {
+            LOGGER.error(e.toString(), e);
+        }
+
+        return addEventRequest;
     }
 }

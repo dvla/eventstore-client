@@ -26,6 +26,7 @@ public class EventStoreConfiguration {
      * Default value for port.
      */
     private static final int DEFAULT_PORT = 1113;
+    private static final int DEFAULT_HTTP_PORT = 2113;
 
     /**
      * Maximum number for the reconnect attempts.
@@ -50,6 +51,11 @@ public class EventStoreConfiguration {
     @Max(MAX_PORT)
     @JsonProperty
     private int port = DEFAULT_PORT;
+
+    @Min(1)
+    @Max(MAX_PORT)
+    @JsonProperty
+    private int httpPort = DEFAULT_HTTP_PORT;
 
     /**
      * The user id.
@@ -128,6 +134,9 @@ public class EventStoreConfiguration {
      */
     public int getPort() {
         return port;
+    }
+    public int getHttpPort() {
+        return httpPort;
     }
 
     /**
