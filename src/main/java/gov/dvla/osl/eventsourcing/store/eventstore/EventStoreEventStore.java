@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import gov.dvla.osl.eventsourcing.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,13 +43,9 @@ import eventstore.j.EsConnectionFactory;
 import eventstore.j.EventDataBuilder;
 import eventstore.j.WriteEventsBuilder;
 import eventstore.tcp.ConnectionActor;
-import gov.dvla.osl.eventsourcing.api.Event;
-import gov.dvla.osl.eventsourcing.api.EventStoreEvent;
-import gov.dvla.osl.eventsourcing.api.Sneak;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfigurationToMap;
 import gov.dvla.osl.eventsourcing.impl.DefaultEventDeserialiser;
-import gov.dvla.osl.eventsourcing.api.EventStore;
 import gov.dvla.osl.eventsourcing.store.memory.ListEventStream;
 
 import rx.Observable;
@@ -110,7 +107,7 @@ public class EventStoreEventStore implements EventStore<Long> {
     }
 
     @Override
-    public gov.dvla.osl.eventsourcing.store.memory.EventStream<Long> loadEventStream(UUID aggregateId) {
+    public EventStream<Long> loadEventStream(UUID aggregateId) {
         final Future<ReadStreamEventsCompleted> future = connection.readStreamEventsForward(streamPrefix + aggregateId, null, 1000, false, null);
         try {
             ReadStreamEventsCompleted result = future.result(Duration.apply(10, TimeUnit.SECONDS), null);

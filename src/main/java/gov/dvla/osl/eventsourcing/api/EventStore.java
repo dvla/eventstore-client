@@ -1,6 +1,5 @@
 package gov.dvla.osl.eventsourcing.api;
 
-import gov.dvla.osl.eventsourcing.store.memory.EventStream;
 import rx.Observable;
 
 import java.util.List;

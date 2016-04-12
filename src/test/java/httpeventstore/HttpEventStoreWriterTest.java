@@ -26,6 +26,7 @@ public class HttpEventStoreWriterTest {
     private EventStoreWriter writer;
     private EventStoreConfiguration configuration;
 
+    private static final String SCHEME = "http";
     private static final String HOST = "localhost";
     private static final Integer PORT = 2113;
     private static final String USERNAME = "testUser";
@@ -37,7 +38,7 @@ public class HttpEventStoreWriterTest {
 
     @Before
     public void setUp() throws IOException {
-        configuration = new EventStoreConfiguration(HOST, PORT, USERNAME, PASSWORD);
+        configuration = new EventStoreConfiguration(SCHEME, HOST, PORT, USERNAME, PASSWORD);
         writer = new EventStoreWriter(configuration, new ObjectMapper());
     }
 

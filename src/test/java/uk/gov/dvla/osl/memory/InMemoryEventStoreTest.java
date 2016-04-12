@@ -2,7 +2,7 @@ package uk.gov.dvla.osl.memory;
 
 import org.junit.Test;
 import gov.dvla.osl.eventsourcing.api.Event;
-import gov.dvla.osl.eventsourcing.store.memory.EventStream;
+import gov.dvla.osl.eventsourcing.api.EventStream;
 import gov.dvla.osl.eventsourcing.store.memory.InMemoryEventStore;
 
 import java.util.Arrays;
