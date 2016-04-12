@@ -48,7 +48,7 @@ import gov.dvla.osl.eventsourcing.api.Sneak;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfigurationToMap;
 import gov.dvla.osl.eventsourcing.impl.DefaultEventDeserialiser;
-import gov.dvla.osl.eventsourcing.store.memory.EventStore;
+import gov.dvla.osl.eventsourcing.api.EventStore;
 import gov.dvla.osl.eventsourcing.store.memory.ListEventStream;
 
 import rx.Observable;

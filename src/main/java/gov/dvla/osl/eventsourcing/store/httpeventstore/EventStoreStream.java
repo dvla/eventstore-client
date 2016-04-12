@@ -18,12 +18,18 @@ import java.util.List;
 
 public class EventStoreStream {
 
-    private static final Logger logger = LoggerFactory.getLogger(EventStoreStream.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventStoreStream.class);
 
     private EventStoreConfiguration configuration;
     private int nextVersionNumber;
     private EventStoreService service;
     private boolean keepGoing = true;
+
+    /**
+     * If an event stream is hard deleted then the event type is labelled "$metadata".  Ensure
+     * these events are not processed.
+     */
+    private static final String HARD_DELETED_EVENT_TYPE = "$metadata";
 
     public EventStoreStream(EventStoreService service, EventStoreConfiguration configuration) throws IOException {
         this.configuration = configuration;
@@ -32,7 +38,7 @@ public class EventStoreStream {
 
     public Observable<Entry> readStreamEventsForward(Func0<Integer> getNextVersionNumber) {
         nextVersionNumber = getNextVersionNumber.call();
-         return Observable.create(subscribeFunction);
+        return Observable.create(subscribeFunction);
     }
 
     public void shutdown() {
@@ -84,10 +90,11 @@ public class EventStoreStream {
     }
 
     private void processEntries(List<Entry> entries, Subscriber subscriber) {
+
         for (int i = entries.size() - 1; i > -1; i--) {
-            logger.debug("Calling subscriber.onNext with " + entries.get(i).getEventType());
             Entry entry = entries.get(i);
-            if(entry!=null) {
+            if (entry != null && entry.getEventNumber() != null && entry.getEventType() != null && !entry.getEventType().equals(HARD_DELETED_EVENT_TYPE)) {
+                LOGGER.debug("Calling subscriber.onNext with " + entries.get(i).getEventType());
                 subscriber.onNext(entry);
             }
         }
@@ -106,7 +113,7 @@ public class EventStoreStream {
     private EventStreamData getUrl(String url, boolean longPoll) throws IOException {
 
         if (longPoll)
-            logger.info("Starting long-poll with value of " + configuration.getProjectionConfiguration().getLongPollSeconds());
+            LOGGER.info("Starting long-poll with value of " + configuration.getProjectionConfiguration().getLongPollSeconds());
 
         Call<EventStreamData> eventStream = service.getEventStreamData(longPoll ? configuration.getProjectionConfiguration().getLongPollSeconds() : null, url + "?embed=body");
 

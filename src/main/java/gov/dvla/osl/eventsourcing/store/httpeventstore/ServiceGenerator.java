@@ -35,7 +35,7 @@ public class ServiceGenerator {
         }
 
         OkHttpClient client = httpClient.readTimeout(31, TimeUnit.SECONDS).build();
-        Retrofit retrofit = builder.baseUrl(configuration.getHost() + ":" + configuration.getPort()).client(client).build();
+        Retrofit retrofit = builder.baseUrl("http://" + configuration.getHost() + ":" + configuration.getHttpPort() + "/").client(client).build();
         return retrofit.create(serviceClass);
     }
 }

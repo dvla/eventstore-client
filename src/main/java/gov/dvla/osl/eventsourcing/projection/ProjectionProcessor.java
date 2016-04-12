@@ -4,7 +4,6 @@ import gov.dvla.osl.eventsourcing.api.EventProcessor;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.EventStoreService;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.ServiceGenerator;
-import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.EventStoreStream;
@@ -24,12 +23,6 @@ public class ProjectionProcessor {
      * Logger.
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ProjectionProcessor.class);
-
-    /**
-     * If an event stream is soft deleted then the event type is labelled "$metadata".  Ensure
-     * these events are not processed.
-     */
-    private static final String SOFT_DELETED_EVENT_TYPE = "$metadata";
 
     private EventStoreConfiguration configuration;
     private EventProcessor eventProcessor;
@@ -68,14 +61,8 @@ public class ProjectionProcessor {
                 return Observable.timer(configuration.getProjectionConfiguration().getSecondsBeforeRetry(), TimeUnit.SECONDS);
             });
         }).subscribe(
-            (event) -> {
-                if(event.getEventNumber()!=null && event.getEventType()!=null && !event.getEventType().equals(SOFT_DELETED_EVENT_TYPE)) {
-                    eventProcessor.processEvent(event);
-                }
-            },
-            (error) -> {
-                LOGGER.error(error.getMessage(), error);
-            },
+            (event) -> eventProcessor.processEvent(event),
+            (error) -> LOGGER.error(error.getMessage(), error),
             () -> LOGGER.debug("Dealer projection finished")
         );
     }
