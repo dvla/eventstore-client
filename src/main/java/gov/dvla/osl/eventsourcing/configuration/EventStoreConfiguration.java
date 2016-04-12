@@ -37,6 +37,14 @@ public class EventStoreConfiguration {
      * Default value for the reconnect attempts value.
      */
     private static final int DEFAULT_RECONNECT_ATTEMPTS = 1000;
+
+    /**
+     * The scheme.
+     */
+    @NotEmpty
+    @JsonProperty
+    private String scheme = "http";
+
     /**
      * The host.
      */
@@ -112,12 +120,21 @@ public class EventStoreConfiguration {
      * @param userId the user id
      * @param password the password
      */
-    public EventStoreConfiguration(final String host, final int port, final String userId,
+    public EventStoreConfiguration(final String scheme, final String host, final int port, final String userId,
                                    final String password) {
+        this.scheme = scheme;
         this.host = host;
         this.port = port;
         this.userId = userId;
         this.password = password;
+    }
+
+    /**
+     * Get scheme.
+     * @return scheme
+     */
+    public String getScheme() {
+        return scheme;
     }
 
     /**
@@ -135,6 +152,11 @@ public class EventStoreConfiguration {
     public int getPort() {
         return port;
     }
+
+    /**
+     * Get httpPort.
+     * @return httpPort
+     */
     public int getHttpPort() {
         return httpPort;
     }

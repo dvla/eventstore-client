@@ -2,6 +2,7 @@ package gov.dvla.osl.eventsourcing.store.memory;
 
 
 import gov.dvla.osl.eventsourcing.api.Event;
+import gov.dvla.osl.eventsourcing.api.EventStream;
 
 import java.util.Collections;
 import java.util.Iterator;

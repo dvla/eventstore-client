@@ -25,6 +25,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class EventStoreConfigurationToMapTest {
 
     /**
+     * Test scheme.
+     */
+    private static final String TEST_SCHEME = "http";
+
+    /**
      * Test host name.
      */
     private static final String TEST_HOST_NAME = "testHost";
@@ -135,6 +140,7 @@ public class EventStoreConfigurationToMapTest {
     @Test
     public void testConnectToKnownCluster() throws Exception {
         final EventStoreConfiguration eventStoreConfig = new EventStoreConfiguration(
+                TEST_SCHEME,
                 DEV_CLUSTER_HOST,
                 1111,
                 TEST_USER,
@@ -169,7 +175,9 @@ public class EventStoreConfigurationToMapTest {
      * @return EventsStoreConfiguration - the configuration
      */
     private EventStoreConfiguration simpleClusteredConfiguration() {
-        final EventStoreConfiguration eventStoreConfig = new EventStoreConfiguration(TEST_HOST_NAME,
+        final EventStoreConfiguration eventStoreConfig = new EventStoreConfiguration(
+                TEST_SCHEME,
+                TEST_HOST_NAME,
                 TEST_PORT,
                 TEST_USER,
                 TEST_PASSWORD);

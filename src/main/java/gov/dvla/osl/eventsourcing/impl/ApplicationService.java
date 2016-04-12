@@ -6,7 +6,7 @@ import gov.dvla.osl.eventsourcing.api.Event;
 import gov.dvla.osl.eventsourcing.api.ReflectionUtil;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.EventStoreWriter;
 import gov.dvla.osl.eventsourcing.api.EventStore;
-import gov.dvla.osl.eventsourcing.store.memory.EventStream;
+import gov.dvla.osl.eventsourcing.api.EventStream;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
