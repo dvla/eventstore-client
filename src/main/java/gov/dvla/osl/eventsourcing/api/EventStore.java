@@ -1,8 +1,7 @@
-package gov.dvla.osl.eventsourcing.store.memory;
+package gov.dvla.osl.eventsourcing.api;
 
-import gov.dvla.osl.eventsourcing.api.Event;
+import gov.dvla.osl.eventsourcing.store.memory.EventStream;
 import rx.Observable;
-import gov.dvla.osl.eventsourcing.api.EventStoreEvent;
 
 import java.util.List;
 import java.util.UUID;
