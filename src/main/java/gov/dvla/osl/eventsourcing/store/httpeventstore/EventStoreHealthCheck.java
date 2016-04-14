@@ -1,6 +1,8 @@
 package gov.dvla.osl.eventsourcing.store.httpeventstore;
 
+import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.HealthCheck;
+import okhttp3.HttpUrl;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -12,9 +14,16 @@ public class EventStoreHealthCheck {
 
     Retrofit retrofit;
 
-    public EventStoreHealthCheck(String baseUrl) {
+    public EventStoreHealthCheck(EventStoreConfiguration configuration) {
+
+        HttpUrl httpUrl = new HttpUrl.Builder()
+                .scheme(configuration.getScheme())
+                .host(configuration.getHost())
+                .port(configuration.getHttpPort())
+                .build();
+
         retrofit = new Retrofit.Builder()
-                .baseUrl(baseUrl)
+                .baseUrl(httpUrl)
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();
     }
