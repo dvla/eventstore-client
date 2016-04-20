@@ -1,7 +1,7 @@
-package gov.dvla.osl.eventsourcing.store.httpeventstore;
+package gov.dvla.osl.eventsourcing.store.http;
 
 import gov.dvla.osl.eventsourcing.api.EntryProcessor;
-import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Entry;
+import gov.dvla.osl.eventsourcing.store.http.entity.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Subscriber;

@@ -1,9 +1,9 @@
-package gov.dvla.osl.eventsourcing.store.httpeventstore;
+package gov.dvla.osl.eventsourcing.store.http;
 
 import gov.dvla.osl.eventsourcing.api.*;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
-import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Entry;
-import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.EventStreamData;
+import gov.dvla.osl.eventsourcing.store.http.entity.Entry;
+import gov.dvla.osl.eventsourcing.store.http.entity.EventStreamData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;

@@ -1,4 +1,4 @@
-package gov.dvla.osl.eventsourcing.store.httpeventstore;
+package gov.dvla.osl.eventsourcing.store.http;
 
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
 import okhttp3.*;

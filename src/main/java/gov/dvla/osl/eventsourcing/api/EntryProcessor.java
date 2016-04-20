@@ -1,6 +1,6 @@
 package gov.dvla.osl.eventsourcing.api;
 
-import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Entry;
+import gov.dvla.osl.eventsourcing.store.http.entity.Entry;
 import rx.Subscriber;
 
 import java.util.List;

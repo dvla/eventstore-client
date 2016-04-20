@@ -1,6 +1,6 @@
 package gov.dvla.osl.eventsourcing.api;
 
-import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Entry;
+import gov.dvla.osl.eventsourcing.store.http.entity.Entry;
 
 public interface EventProcessor {
     void processEvent(Entry event);

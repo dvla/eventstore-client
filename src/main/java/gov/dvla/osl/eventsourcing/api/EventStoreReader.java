@@ -1,12 +1,8 @@
 package gov.dvla.osl.eventsourcing.api;
 
-import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Entry;
+import gov.dvla.osl.eventsourcing.store.http.entity.Entry;
 import rx.Observable;
 import rx.functions.Func0;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 public interface EventStoreReader<V> {
 	EventStream<Long> loadEventStream(String aggregateId);

@@ -1,4 +1,4 @@
-package gov.dvla.osl.eventsourcing.store.tcpeventstore;
+package gov.dvla.osl.eventsourcing.store.tcp;
 
 
 import akka.actor.ActorSystem;
@@ -14,7 +14,7 @@ import gov.dvla.osl.eventsourcing.api.EventStream;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfigurationToMap;
 import gov.dvla.osl.eventsourcing.impl.DefaultEventDeserialiser;
-import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Entry;
+import gov.dvla.osl.eventsourcing.store.http.entity.Entry;
 import gov.dvla.osl.eventsourcing.store.memory.ListEventStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,4 +1,4 @@
-package gov.dvla.osl.eventsourcing.store.httpeventstore.entity;
+package gov.dvla.osl.eventsourcing.store.http.entity;
 
 import java.util.HashMap;
 import java.util.Map;

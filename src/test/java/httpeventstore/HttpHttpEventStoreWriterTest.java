@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import gov.dvla.osl.eventsourcing.api.Event;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
-import gov.dvla.osl.eventsourcing.store.httpeventstore.HttpEventStoreWriter;
+import gov.dvla.osl.eventsourcing.store.http.HttpEventStoreWriter;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

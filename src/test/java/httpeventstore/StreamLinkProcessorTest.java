@@ -1,7 +1,7 @@
 package httpeventstore;
 
-import gov.dvla.osl.eventsourcing.store.httpeventstore.StreamLinkProcessor;
-import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Link;
+import gov.dvla.osl.eventsourcing.store.http.StreamLinkProcessor;
+import gov.dvla.osl.eventsourcing.store.http.entity.Link;
 import org.junit.Test;
 
 import java.util.ArrayList;

@@ -4,7 +4,7 @@ import gov.dvla.osl.eventsourcing.api.Aggregate;
 import gov.dvla.osl.eventsourcing.api.Command;
 import gov.dvla.osl.eventsourcing.api.Event;
 import gov.dvla.osl.eventsourcing.api.ReflectionUtil;
-import gov.dvla.osl.eventsourcing.store.httpeventstore.HttpEventStoreWriter;
+import gov.dvla.osl.eventsourcing.store.http.HttpEventStoreWriter;
 import gov.dvla.osl.eventsourcing.api.EventStoreReader;
 import gov.dvla.osl.eventsourcing.api.EventStream;
 

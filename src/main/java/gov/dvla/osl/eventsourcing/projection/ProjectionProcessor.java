@@ -2,7 +2,7 @@ package gov.dvla.osl.eventsourcing.projection;
 
 import gov.dvla.osl.eventsourcing.api.EventProcessor;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
-import gov.dvla.osl.eventsourcing.store.httpeventstore.*;
+import gov.dvla.osl.eventsourcing.store.http.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;

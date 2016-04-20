@@ -1,4 +1,4 @@
-package gov.dvla.osl.eventsourcing.store.httpeventstore;
+package gov.dvla.osl.eventsourcing.store.http;
 
 import java.util.UUID;
 

@@ -3,7 +3,7 @@ package gov.dvla.osl.eventsourcing.store.memory;
 import gov.dvla.osl.eventsourcing.api.Event;
 import gov.dvla.osl.eventsourcing.api.EventStoreReader;
 import gov.dvla.osl.eventsourcing.api.EventStream;
-import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Entry;
+import gov.dvla.osl.eventsourcing.store.http.entity.Entry;
 import rx.Observable;
 import gov.dvla.osl.eventsourcing.api.EventStoreEvent;
 import rx.functions.Func0;

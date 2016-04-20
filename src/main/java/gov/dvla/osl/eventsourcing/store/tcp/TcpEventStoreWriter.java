@@ -1,4 +1,4 @@
-package gov.dvla.osl.eventsourcing.store.tcpeventstore;
+package gov.dvla.osl.eventsourcing.store.tcp;
 
 import akka.actor.*;
 import akka.event.Logging;

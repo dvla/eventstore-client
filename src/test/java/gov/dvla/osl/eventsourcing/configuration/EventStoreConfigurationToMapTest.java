@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import gov.dvla.osl.eventsourcing.store.tcpeventstore.TcpEventStoreReader;
+import gov.dvla.osl.eventsourcing.store.tcp.TcpEventStoreReader;
 
 import static gov.dvla.osl.eventsourcing.configuration.EventStoreConfigurationToMap.*;
 import static org.hamcrest.CoreMatchers.is;
