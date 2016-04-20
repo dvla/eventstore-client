@@ -14,11 +14,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-//TODO: Pass timeout through using config for the tcp version of this
-//
-//private static final long DEFAULT_TIMEOUT_SECONDS = 1;
-//private static final TimeUnit DEFAULT_TIMEUNIT = TimeUnit.SECONDS;
-
 public class HttpEventStoreWriter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpEventStoreWriter.class);

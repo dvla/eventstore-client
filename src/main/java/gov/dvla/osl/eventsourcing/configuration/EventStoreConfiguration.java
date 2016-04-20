@@ -7,6 +7,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * The event store configuration.
  *
@@ -37,6 +39,11 @@ public class EventStoreConfiguration {
      * Default value for the reconnect attempts value.
      */
     private static final int DEFAULT_RECONNECT_ATTEMPTS = 1000;
+
+    /**
+     * Default value for the store timeout
+     */
+    private static final long DEFAULT_TIMEOUT_SECONDS = 1;
 
     /**
      * The scheme.
@@ -80,13 +87,20 @@ public class EventStoreConfiguration {
     private String password;
 
     /**
-     * Maxinum number of reconnection attempts for the eventstore client before it backs out.
+     * Maximum number of reconnection attempts for the eventstore client before it backs out.
      * reconnecting following connection loss
      */
     @Min(-1)
     @Max(MAX_RECONNECT_ATTEMPTS)
     @JsonProperty
     private int reconnectionAttempts = DEFAULT_RECONNECT_ATTEMPTS;
+
+    /**
+     * Timeout for the storing of events
+     */
+    @Min(1)
+    @JsonProperty
+    private long timeoutSeconds = DEFAULT_TIMEOUT_SECONDS;
 
     /**
      * Projection configuration.
@@ -175,6 +189,14 @@ public class EventStoreConfiguration {
      */
     public String getPassword() {
         return password;
+    }
+
+    /**
+     * Get the number of seconds before timing out an eventstore write
+     * @return max reconnection attempts
+     */
+    public long getTimeoutSeconds() {
+        return timeoutSeconds;
     }
 
     /**
