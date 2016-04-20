@@ -27,7 +27,7 @@ public class ApplicationService {
     }
 
     public void handle(Command command) throws Exception {
-        EventStream<Long> eventStream = eventStoreReader.loadEventStream(command.aggregateId());
+        EventStream<Long> eventStream = eventStoreReader.loadEventStream(command.aggregateId().toString());
         Object target = newAggregateInstance(command);
         for (Event event : eventStream) {
             ReflectionUtil.invokeHandleMethod(target, event);

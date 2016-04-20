@@ -7,7 +7,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public interface EventStoreReader<V> {
-	EventStream<Long> loadEventStream(UUID aggregateId);
+	EventStream<Long> loadEventStream(String aggregateId);
 	Observable<EventStoreEvent> all();
 	Observable<EventStoreEvent> streamFrom(String streamName);
 }

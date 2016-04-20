@@ -107,7 +107,7 @@ public class EventStoreEventStore implements EventStoreReader<Long> {
     }
 
     @Override
-    public EventStream<Long> loadEventStream(UUID aggregateId) {
+    public EventStream<Long> loadEventStream(String aggregateId) {
         final Future<ReadStreamEventsCompleted> future = connection.readStreamEventsForward(streamPrefix + aggregateId, null, 1000, false, null);
         try {
             ReadStreamEventsCompleted result = future.result(Duration.apply(10, TimeUnit.SECONDS), null);
