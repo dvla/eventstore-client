@@ -1,7 +1,7 @@
 package gov.dvla.osl.eventsourcing.store.memory;
 
 import gov.dvla.osl.eventsourcing.api.Event;
-import gov.dvla.osl.eventsourcing.api.EventStore;
+import gov.dvla.osl.eventsourcing.api.EventStoreReader;
 import gov.dvla.osl.eventsourcing.api.EventStream;
 import rx.Observable;
 import gov.dvla.osl.eventsourcing.api.EventStoreEvent;
@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-public class InMemoryEventStore implements EventStore<Long> {
+public class InMemoryEventStore implements EventStoreReader<Long> {
 	private final Map<UUID, ListEventStream> streams = new ConcurrentHashMap<UUID, ListEventStream>();
 	private final TreeSet<Transaction> transactions = new TreeSet<Transaction>();
 

@@ -59,7 +59,7 @@ import static rx.Observable.create;
  * Eventstore implementation pointing to an actual instance of eventstore, via the eventstore
  * JVM client.
  */
-public class EventStoreEventStore implements EventStore<Long> {
+public class EventStoreEventStore implements EventStoreReader<Long> {
 
     /**
      * Logger for this class.

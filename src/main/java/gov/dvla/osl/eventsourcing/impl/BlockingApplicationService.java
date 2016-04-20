@@ -9,18 +9,18 @@ import java.util.UUID;
 
 public class BlockingApplicationService {
 
-    private final EventStore eventStore;
+    private final EventStoreReader eventStoreReader;
     private EventStoreWriter eventStoreWriter;
     private CommandHandlerLookup commandHandlerLookup;
 
-    public BlockingApplicationService(EventStore eventStore, EventStoreWriter eventStoreWriter, Class<?>... aggregateTypes) {
-        this.eventStore = eventStore;
+    public BlockingApplicationService(EventStoreReader eventStoreReader, EventStoreWriter eventStoreWriter, Class<?>... aggregateTypes) {
+        this.eventStoreReader = eventStoreReader;
         this.eventStoreWriter = eventStoreWriter;
         this.commandHandlerLookup = new CommandHandlerLookup(ReflectionUtil.HANDLE_METHOD, aggregateTypes);
     }
 
     public void handle(Command command) throws Exception {
-        EventStream<Long> eventStream = eventStore.loadEventStream(command.aggregateId());
+        EventStream<Long> eventStream = eventStoreReader.loadEventStream(command.aggregateId());
         Object target = newAggregateInstance(command);
         for (Event event : eventStream) {
             ReflectionUtil.invokeHandleMethod(target, event);
