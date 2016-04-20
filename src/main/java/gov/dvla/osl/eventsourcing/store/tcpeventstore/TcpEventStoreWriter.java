@@ -1,12 +1,13 @@
 package gov.dvla.osl.eventsourcing.store.tcpeventstore;
 
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
+import akka.actor.*;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import eventstore.EsException;
 import eventstore.EventData;
 import eventstore.Settings;
 import eventstore.WriteEventsCompleted;
@@ -20,7 +21,6 @@ import gov.dvla.osl.eventsourcing.api.EventStoreWriter;
 import gov.dvla.osl.eventsourcing.api.Sneak;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfigurationToMap;
-import gov.dvla.osl.eventsourcing.store.eventstore.EventStoreEventStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,14 +78,14 @@ public class TcpEventStoreWriter implements EventStoreWriter {
         this.system = ActorSystem.create("default", combined);
 
         connectionActor = system.actorOf(ConnectionActor.getProps(Settings.apply(combined)));
-        writeResult = system.actorOf(Props.create(EventStoreEventStore.WriteResult.class));
+        writeResult = system.actorOf(Props.create(WriteResult.class));
         this.connection = EsConnectionFactory.create(system, Settings.apply(combined));
     }
 
     @Override
     public void store(String aggregateId, long expectedVersion, List<Event> events) {
         final CompletableFuture<WriteEventsCompleted> future = new CompletableFuture<>();
-        final ActorRef writeResult = system.actorOf(Props.create(EventStoreEventStore.NotifyingWriteResult.class, future));
+        final ActorRef writeResult = system.actorOf(Props.create(NotifyingWriteResult.class, future));
         store(aggregateId, expectedVersion, events, writeResult);
 
         try {
@@ -117,6 +117,50 @@ public class TcpEventStoreWriter implements EventStoreWriter {
                     .build();
         } catch (JsonProcessingException exception) {
             throw Sneak.sneakyThrow(exception);
+        }
+    }
+
+    public static class WriteResult extends UntypedActor {
+        final LoggingAdapter log = Logging.getLogger(getContext().system(), this);
+
+        @Override
+        public void onReceive(Object message) throws Exception {
+            if (message instanceof WriteEventsCompleted) {
+                final WriteEventsCompleted completed = (WriteEventsCompleted) message;
+                log.info("range: {}, position: {}", completed.numbersRange(), completed.position());
+            } else if (message instanceof Status.Failure) {
+                final Status.Failure failure = ((Status.Failure) message);
+                final EsException exception = (EsException) failure.cause();
+                log.error(exception, exception.toString());
+            } else {
+                unhandled(message);
+            }
+        }
+    }
+
+    public static class NotifyingWriteResult extends UntypedActor {
+
+        final LoggingAdapter log = Logging.getLogger(getContext().system(), this);
+
+        private final CompletableFuture<WriteEventsCompleted> notifyingFuture;
+
+        public NotifyingWriteResult(CompletableFuture<WriteEventsCompleted> notifyingFuture) {
+            this.notifyingFuture = notifyingFuture;
+        }
+
+        @Override
+        public void onReceive(Object message) throws Exception {
+            if (message instanceof WriteEventsCompleted) {
+                final WriteEventsCompleted completed = (WriteEventsCompleted) message;
+                log.info("range: {}, position: {}", completed.numbersRange(), completed.position());
+                this.notifyingFuture.complete((WriteEventsCompleted) message);
+            } else if (message instanceof Status.Failure) {
+                final Status.Failure failure = ((Status.Failure) message);
+                final EsException exception = (EsException) failure.cause();
+                log.error(exception, exception.toString());
+            } else {
+                unhandled(message);
+            }
         }
     }
 }

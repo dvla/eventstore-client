@@ -1,5 +1,27 @@
-package gov.dvla.osl.eventsourcing.store.eventstore;
+package gov.dvla.osl.eventsourcing.store.tcpeventstore;
 
+
+import akka.actor.ActorSystem;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+import eventstore.*;
+import eventstore.j.EsConnection;
+import eventstore.j.EsConnectionFactory;
+import gov.dvla.osl.eventsourcing.api.Event;
+import gov.dvla.osl.eventsourcing.api.*;
+import gov.dvla.osl.eventsourcing.api.EventStream;
+import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
+import gov.dvla.osl.eventsourcing.configuration.EventStoreConfigurationToMap;
+import gov.dvla.osl.eventsourcing.impl.DefaultEventDeserialiser;
+import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Entry;
+import gov.dvla.osl.eventsourcing.store.memory.ListEventStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import rx.Observable;
+import rx.functions.Func0;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -8,72 +30,25 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import gov.dvla.osl.eventsourcing.api.*;
-import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Entry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import akka.actor.ActorRef;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.actor.Status;
-import akka.actor.UntypedActor;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
-
-import eventstore.EsException;
-import eventstore.EventData;
-import eventstore.IndexedEvent;
-import eventstore.ReadStreamEventsCompleted;
-import eventstore.Settings;
-import eventstore.StreamNotFoundException;
-import eventstore.SubscriptionObserver;
-import eventstore.WriteEventsCompleted;
-import eventstore.j.EsConnection;
-import eventstore.j.EsConnectionFactory;
-import eventstore.j.EventDataBuilder;
-import eventstore.j.WriteEventsBuilder;
-import eventstore.tcp.ConnectionActor;
-import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
-import gov.dvla.osl.eventsourcing.configuration.EventStoreConfigurationToMap;
-import gov.dvla.osl.eventsourcing.impl.DefaultEventDeserialiser;
-import gov.dvla.osl.eventsourcing.store.memory.ListEventStream;
-
-import rx.Observable;
-import rx.functions.Func0;
-import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
-
 
 import static rx.Observable.create;
 
 /**
- * Eventstore implementation pointing to an actual instance of eventstore, via the eventstore
+ * EventStoreReader implementation pointing to an actual instance of eventstore, via the eventstore
  * JVM client.
  */
-public class EventStoreEventStore implements EventStoreReader<Long> {
+public class TcpEventStoreReader implements EventStoreReader<Long> {
 
     /**
      * Logger for this class.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(EventStoreEventStore.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TcpEventStoreReader.class);
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
     private final ActorSystem system;
     private final String streamPrefix;
-    private final ActorRef connectionActor;
-    private final ActorRef writeResult;
     private final ObjectMapper mapper;
     private final EsConnection connection;
 
@@ -83,8 +58,8 @@ public class EventStoreEventStore implements EventStoreReader<Long> {
      * @param mapper - object mapper which we will use for encoding events
      * @param config - configuration object for the eventstore client
      */
-    public EventStoreEventStore(final String streamPrefix, final ObjectMapper mapper,
-                                final EventStoreConfiguration config) {
+    public TcpEventStoreReader(final String streamPrefix, final ObjectMapper mapper,
+                               final EventStoreConfiguration config) {
         this.streamPrefix = streamPrefix;
         this.mapper = mapper;
 
@@ -103,8 +78,6 @@ public class EventStoreEventStore implements EventStoreReader<Long> {
         // Retained "default" as name to ensure same basic behaviour as previous version
         this.system = ActorSystem.create("default", combined);
 
-        connectionActor = system.actorOf(ConnectionActor.getProps(Settings.apply(combined)));
-        writeResult = system.actorOf(Props.create(WriteResult.class));
         this.connection = EsConnectionFactory.create(system, Settings.apply(combined));
     }
 
@@ -143,92 +116,6 @@ public class EventStoreEventStore implements EventStoreReader<Long> {
         eventStoreEvent.setData(domainEvent.toString());
         eventStoreEvent.setEventNumber(event.number().value());
         return eventStoreEvent;
-    }
-
-    @Deprecated
-    public void store(UUID aggregateId, long version, List<Event> events) {
-        store(aggregateId, version, events, writeResult);
-    }
-
-    public void storeBlocking(UUID aggregateId, long version, List<Event> events, long timeout, TimeUnit timeUnit) {
-        final CompletableFuture<WriteEventsCompleted> future = new CompletableFuture<>();
-        final ActorRef writeResult = system.actorOf(Props.create(NotifyingWriteResult.class, future));
-        store(aggregateId, version, events, writeResult);
-
-        try {
-            future.get(timeout, timeUnit);
-        } catch (InterruptedException|ExecutionException|TimeoutException exception) {
-            LOGGER.error(exception.getMessage(), exception);
-            throw new RuntimeException("Failed to store events to event store", exception);
-        }
-    }
-
-    private void store(UUID aggregateId, long version, List<Event> events, ActorRef writeResult) {
-        WriteEventsBuilder builder = new WriteEventsBuilder(streamPrefix + aggregateId);
-        for (Event event : events) {
-            builder = builder.addEvent(toEventData(event));
-        }
-        if (version >= 0) {
-            builder = builder.expectVersion((int) version);
-        } else {
-            builder = builder.expectNoStream();
-        }
-        connectionActor.tell(builder.build(), writeResult);
-    }
-
-    private EventData toEventData(Event event) {
-        try {
-            return new EventDataBuilder(event.getClass().getName())
-                    .eventId(UUID.randomUUID())
-                    .jsonData(mapper.writeValueAsString(event))
-                    .build();
-        } catch (JsonProcessingException exception) {
-            throw Sneak.sneakyThrow(exception);
-        }
-    }
-
-    public static class WriteResult extends UntypedActor {
-        final LoggingAdapter log = Logging.getLogger(getContext().system(), this);
-
-        @Override
-        public void onReceive(Object message) throws Exception {
-            if (message instanceof WriteEventsCompleted) {
-                final WriteEventsCompleted completed = (WriteEventsCompleted) message;
-                log.info("range: {}, position: {}", completed.numbersRange(), completed.position());
-            } else if (message instanceof Status.Failure) {
-                final Status.Failure failure = ((Status.Failure) message);
-                final EsException exception = (EsException) failure.cause();
-                log.error(exception, exception.toString());
-            } else {
-                unhandled(message);
-            }
-        }
-    }
-
-    public static class NotifyingWriteResult extends UntypedActor {
-
-        final LoggingAdapter log = Logging.getLogger(getContext().system(), this);
-
-        private final CompletableFuture<WriteEventsCompleted> notifyingFuture;
-
-        public NotifyingWriteResult(CompletableFuture<WriteEventsCompleted> notifyingFuture) {
-            this.notifyingFuture = notifyingFuture;
-        }
-
-        @Override
-        public void onReceive(Object message) throws Exception {
-            if (message instanceof WriteEventsCompleted) {
-                final WriteEventsCompleted completed = (WriteEventsCompleted) message;
-                log.info("range: {}, position: {}", completed.numbersRange(), completed.position());
-                this.notifyingFuture.complete((WriteEventsCompleted) message);
-            } else if (message instanceof Status.Failure) {
-                final Status.Failure failure = ((Status.Failure) message);
-                final EsException exception = (EsException) failure.cause();
-                log.error(exception, exception.toString());
-            } else {
-                unhandled(message);
-            }
-        }
     }
 
     @Deprecated

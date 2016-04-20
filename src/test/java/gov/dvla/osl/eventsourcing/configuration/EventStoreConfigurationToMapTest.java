@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import gov.dvla.osl.eventsourcing.store.eventstore.EventStoreEventStore;
+import gov.dvla.osl.eventsourcing.store.tcpeventstore.TcpEventStoreReader;
 
 import static gov.dvla.osl.eventsourcing.configuration.EventStoreConfigurationToMap.*;
 import static org.hamcrest.CoreMatchers.is;
@@ -159,7 +159,7 @@ public class EventStoreConfigurationToMapTest {
         clusterConfig.setGossipTimeout(TEST_GOSSIP_TIMEOUT);
 
         eventStoreConfig.setCluster(clusterConfig);
-        final EventStoreEventStore store = new EventStoreEventStore("test-stream",
+        final TcpEventStoreReader store = new TcpEventStoreReader("test-stream",
                 new ObjectMapper(),
                 eventStoreConfig
                 );
