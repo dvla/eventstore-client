@@ -1,8 +1,6 @@
 package gov.dvla.osl.eventsourcing.store.httpeventstore;
 
-import gov.dvla.osl.eventsourcing.api.DataFetcher;
-import gov.dvla.osl.eventsourcing.api.EntryProcessor;
-import gov.dvla.osl.eventsourcing.api.LinkProcessor;
+import gov.dvla.osl.eventsourcing.api.*;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Entry;
 import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.EventStreamData;
@@ -14,9 +12,9 @@ import rx.functions.Func0;
 
 import java.io.IOException;
 
-public class EventStoreStream {
+public class HttpEventStoreReader implements EventStoreReader<Long> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EventStoreStream.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpEventStoreReader.class);
 
     private EventStoreConfiguration configuration;
     private int nextVersionNumber;
@@ -25,14 +23,29 @@ public class EventStoreStream {
     private DataFetcher dataFetcher;
     private boolean keepGoing = true;
 
-    public EventStoreStream(EventStoreConfiguration configuration,
-                            EntryProcessor entryProcessor,
-                            LinkProcessor linkProcessor,
-                            DataFetcher dataFetcher) throws IOException {
+    public HttpEventStoreReader(EventStoreConfiguration configuration,
+                                EntryProcessor entryProcessor,
+                                LinkProcessor linkProcessor,
+                                DataFetcher dataFetcher) throws IOException {
         this.configuration = configuration;
         this.entryProcessor = entryProcessor;
         this.linkProcessor = linkProcessor;
         this.dataFetcher = dataFetcher;
+    }
+
+    @Override
+    public EventStream<Long> loadEventStream(String aggregateId) {
+        return null;
+    }
+
+    @Override
+    public Observable<EventStoreEvent> all() {
+        return null;
+    }
+
+    @Override
+    public Observable<EventStoreEvent> streamFrom(String streamName) {
+        return null;
     }
 
     public Observable<Entry> readStreamEventsForward(Func0<Integer> getNextVersionNumber) {

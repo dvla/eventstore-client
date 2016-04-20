@@ -3,8 +3,10 @@ package gov.dvla.osl.eventsourcing.store.memory;
 import gov.dvla.osl.eventsourcing.api.Event;
 import gov.dvla.osl.eventsourcing.api.EventStoreReader;
 import gov.dvla.osl.eventsourcing.api.EventStream;
+import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Entry;
 import rx.Observable;
 import gov.dvla.osl.eventsourcing.api.EventStoreEvent;
+import rx.functions.Func0;
 
 import java.util.*;
 
@@ -43,5 +45,15 @@ public class InMemoryEventStoreReader extends InMemoryEventStore implements Even
 	public Observable<EventStoreEvent> streamFrom(String streamName) {
 		return null;
 	}
+
+    @Override
+    public Observable<Entry> readStreamEventsForward(Func0<Integer> getNextVersionNumber) {
+        return null;
+    }
+
+    @Override
+    public void shutdown() {
+
+    }
 
 }

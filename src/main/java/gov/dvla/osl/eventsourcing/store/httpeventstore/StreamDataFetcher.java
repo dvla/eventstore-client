@@ -12,7 +12,7 @@ import java.io.IOException;
 
 public class StreamDataFetcher implements DataFetcher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EventStoreStream.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpEventStoreReader.class);
     private EventStoreService service;
     private String longPollSeconds;
 

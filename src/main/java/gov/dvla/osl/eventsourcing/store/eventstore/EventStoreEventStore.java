@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import gov.dvla.osl.eventsourcing.api.*;
+import gov.dvla.osl.eventsourcing.store.httpeventstore.entity.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +50,7 @@ import gov.dvla.osl.eventsourcing.impl.DefaultEventDeserialiser;
 import gov.dvla.osl.eventsourcing.store.memory.ListEventStream;
 
 import rx.Observable;
+import rx.functions.Func0;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
@@ -299,6 +301,16 @@ public class EventStoreEventStore implements EventStoreReader<Long> {
                 subscriber.onCompleted();
             }
         }, 0, false, null));
+    }
+
+    @Override
+    public Observable<Entry> readStreamEventsForward(Func0<Integer> getNextVersionNumber) {
+        return null;
+    }
+
+    @Override
+    public void shutdown() {
+
     }
 
 }

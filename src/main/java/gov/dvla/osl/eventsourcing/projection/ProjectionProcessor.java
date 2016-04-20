@@ -24,7 +24,7 @@ public class ProjectionProcessor {
 
     private EventStoreConfiguration configuration;
     private EventProcessor eventProcessor;
-    private EventStoreStream categoryStream;
+    private HttpEventStoreReader categoryStream;
 
     /**
      * Constructor.
@@ -50,7 +50,7 @@ public class ProjectionProcessor {
 
         EventStoreService eventService = ServiceGenerator.createService(EventStoreService.class, this.configuration);
 
-        categoryStream = new EventStoreStream(
+        categoryStream = new HttpEventStoreReader(
                 this.configuration,
                 new StreamEntryProcessor(),
                 new StreamLinkProcessor(),
