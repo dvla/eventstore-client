@@ -24,7 +24,6 @@ public class InMemoryEventStore implements EventStore<Long> {
 		return eventStream;
 	}
 
-	@Override
 	public void store(UUID aggregateId, long version, List<Event> events) {
 		ListEventStream stream = loadEventStream(aggregateId);
 		if (stream.version() != version) {
@@ -36,7 +35,6 @@ public class InMemoryEventStore implements EventStore<Long> {
 		}
 	}
 
-	@Override
 	public void storeBlocking(UUID aggregateId, long version, List<Event> events, long timeout, TimeUnit timeUnit) {
 		store(aggregateId, version, events);
 	}

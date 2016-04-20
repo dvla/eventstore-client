@@ -144,12 +144,10 @@ public class EventStoreEventStore implements EventStore<Long> {
     }
 
     @Deprecated
-    @Override
     public void store(UUID aggregateId, long version, List<Event> events) {
         store(aggregateId, version, events, writeResult);
     }
 
-    @Override
     public void storeBlocking(UUID aggregateId, long version, List<Event> events, long timeout, TimeUnit timeUnit) {
         final CompletableFuture<WriteEventsCompleted> future = new CompletableFuture<>();
         final ActorRef writeResult = system.actorOf(Props.create(NotifyingWriteResult.class, future));

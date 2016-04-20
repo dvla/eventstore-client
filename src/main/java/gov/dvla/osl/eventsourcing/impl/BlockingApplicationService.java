@@ -1,36 +1,21 @@
 package gov.dvla.osl.eventsourcing.impl;
 
-import gov.dvla.osl.eventsourcing.api.Aggregate;
-import gov.dvla.osl.eventsourcing.api.Command;
-import gov.dvla.osl.eventsourcing.api.Event;
-import gov.dvla.osl.eventsourcing.api.ReflectionUtil;
-import gov.dvla.osl.eventsourcing.api.EventStore;
-import gov.dvla.osl.eventsourcing.api.EventStream;
+import gov.dvla.osl.eventsourcing.api.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 public class BlockingApplicationService {
 
-    private static final long DEFAULT_TIMEOUT_SECONDS = 1;
-    private static final TimeUnit DEFAULT_TIMEUNIT = TimeUnit.SECONDS;
-
     private final EventStore eventStore;
-    private final long timeout;
-    private final TimeUnit timeoutUnit;
+    private EventStoreWriter eventStoreWriter;
     private CommandHandlerLookup commandHandlerLookup;
 
-    public BlockingApplicationService(EventStore eventStore, Class<?>... aggregateTypes) {
-        this(eventStore, DEFAULT_TIMEOUT_SECONDS, TimeUnit.SECONDS, aggregateTypes);
-    }
-
-    public BlockingApplicationService(EventStore eventStore, long timeout, final TimeUnit timeoutUnit, Class<?>... aggregateTypes) {
+    public BlockingApplicationService(EventStore eventStore, EventStoreWriter eventStoreWriter, Class<?>... aggregateTypes) {
         this.eventStore = eventStore;
-        this.timeout = timeout;
-        this.timeoutUnit = timeoutUnit;
+        this.eventStoreWriter = eventStoreWriter;
         this.commandHandlerLookup = new CommandHandlerLookup(ReflectionUtil.HANDLE_METHOD, aggregateTypes);
     }
 
@@ -43,7 +28,7 @@ public class BlockingApplicationService {
         ReflectionUtil.invokeHandleMethod(target, command);
         List<Event> events = ((Aggregate) target).getUncommittedEvents();
         if (events != null && events.size() > 0) {
-            eventStore.storeBlocking(command.aggregateId(), eventStream.version(), events, timeout, timeoutUnit);
+            eventStoreWriter.store(command.aggregateId().toString(), eventStream.version(), events);
         } else {
             // Command generated no events
         }
