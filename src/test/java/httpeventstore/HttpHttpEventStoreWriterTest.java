@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import gov.dvla.osl.eventsourcing.api.Event;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
-import gov.dvla.osl.eventsourcing.store.httpeventstore.EventStoreWriter;
+import gov.dvla.osl.eventsourcing.store.httpeventstore.HttpEventStoreWriter;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -18,12 +18,12 @@ import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
-public class HttpEventStoreWriterTest {
+public class HttpHttpEventStoreWriterTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpEventStoreWriterTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpHttpEventStoreWriterTest.class);
 
     private final String STREAM_NAME = "testStream";
-    private EventStoreWriter writer;
+    private HttpEventStoreWriter writer;
     private EventStoreConfiguration configuration;
 
     private static final String SCHEME = "http";
@@ -39,7 +39,7 @@ public class HttpEventStoreWriterTest {
     @Before
     public void setUp() throws IOException {
         configuration = new EventStoreConfiguration(SCHEME, HOST, PORT, USERNAME, PASSWORD);
-        writer = new EventStoreWriter(configuration, new ObjectMapper());
+        writer = new HttpEventStoreWriter(configuration, new ObjectMapper());
     }
 
     @Test

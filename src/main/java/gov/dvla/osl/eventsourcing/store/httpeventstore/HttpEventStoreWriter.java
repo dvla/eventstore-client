@@ -19,15 +19,15 @@ import java.util.stream.Collectors;
 //private static final long DEFAULT_TIMEOUT_SECONDS = 1;
 //private static final TimeUnit DEFAULT_TIMEUNIT = TimeUnit.SECONDS;
 
-public class EventStoreWriter {
+public class HttpEventStoreWriter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EventStoreWriter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpEventStoreWriter.class);
     private static final String WRITING_EVENT_ERROR = "Error in Writing event to event store";
 
     private EventStoreConfiguration configuration;
     private final ObjectMapper mapper;
 
-    public EventStoreWriter(EventStoreConfiguration configuration, final ObjectMapper mapper) {
+    public HttpEventStoreWriter(EventStoreConfiguration configuration, final ObjectMapper mapper) {
         this.configuration = configuration;
         this.mapper = mapper;
     }

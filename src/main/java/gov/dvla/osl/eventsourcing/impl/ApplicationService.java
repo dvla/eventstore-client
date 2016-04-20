@@ -4,7 +4,7 @@ import gov.dvla.osl.eventsourcing.api.Aggregate;
 import gov.dvla.osl.eventsourcing.api.Command;
 import gov.dvla.osl.eventsourcing.api.Event;
 import gov.dvla.osl.eventsourcing.api.ReflectionUtil;
-import gov.dvla.osl.eventsourcing.store.httpeventstore.EventStoreWriter;
+import gov.dvla.osl.eventsourcing.store.httpeventstore.HttpEventStoreWriter;
 import gov.dvla.osl.eventsourcing.api.EventStoreReader;
 import gov.dvla.osl.eventsourcing.api.EventStream;
 
@@ -15,13 +15,13 @@ import java.util.UUID;
 
 public class ApplicationService {
     private final EventStoreReader eventStoreReader;
-    private EventStoreWriter eventStoreWriter;
+    private HttpEventStoreWriter httpEventStoreWriter;
     private String streamPrefix;
     private CommandHandlerLookup commandHandlerLookup;
 
-    public ApplicationService(EventStoreReader eventStoreReader, EventStoreWriter eventStoreWriter, String streamPrefix, Class<?>... aggregateTypes) {
+    public ApplicationService(EventStoreReader eventStoreReader, HttpEventStoreWriter httpEventStoreWriter, String streamPrefix, Class<?>... aggregateTypes) {
         this.eventStoreReader = eventStoreReader;
-        this.eventStoreWriter = eventStoreWriter;
+        this.httpEventStoreWriter = httpEventStoreWriter;
         this.streamPrefix = streamPrefix;
         this.commandHandlerLookup = new CommandHandlerLookup(ReflectionUtil.HANDLE_METHOD, aggregateTypes);
     }
@@ -35,7 +35,7 @@ public class ApplicationService {
         ReflectionUtil.invokeHandleMethod(target, command);
         List<Event> events = ((Aggregate) target).getUncommittedEvents();
         if (events != null && events.size() > 0) {
-            eventStoreWriter.writeEvents(streamPrefix + "-" + command.aggregateId(), eventStream.version(), events);
+            httpEventStoreWriter.writeEvents(streamPrefix + "-" + command.aggregateId(), eventStream.version(), events);
 //            eventStore.store(command.aggregateId(), eventStream.version(), events);
         }
     }
