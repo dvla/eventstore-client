@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-public class InMemoryEventStore implements EventStoreReader<Long> {
+public class InMemoryEventStoreReader implements EventStoreReader<Long> {
 	private final Map<UUID, ListEventStream> streams = new ConcurrentHashMap<UUID, ListEventStream>();
 	private final TreeSet<Transaction> transactions = new TreeSet<Transaction>();
 
