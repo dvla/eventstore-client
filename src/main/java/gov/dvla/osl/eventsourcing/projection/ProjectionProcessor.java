@@ -74,7 +74,7 @@ public class ProjectionProcessor {
         }).subscribe(
             (event) -> eventProcessor.processEvent(event),
             (error) -> LOGGER.error(error.getMessage(), error),
-            () -> LOGGER.debug("Dealer projection finished")
+            () -> LOGGER.debug("Projection finished")
         );
     }
 

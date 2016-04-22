@@ -2,6 +2,7 @@ package gov.dvla.osl.eventsourcing.store.http.reader;
 
 import gov.dvla.osl.eventsourcing.api.*;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
+import gov.dvla.osl.eventsourcing.exception.EventStoreClientTechnicalException;
 import gov.dvla.osl.eventsourcing.impl.DefaultEventDeserialiser;
 import gov.dvla.osl.eventsourcing.store.http.*;
 import gov.dvla.osl.eventsourcing.store.http.entity.Entry;
@@ -62,6 +63,9 @@ public class HttpEventStoreReader implements EventStoreReader<Long> {
             public void call(Subscriber<? super Entry> subscriber) {
                 try {
                     processData(subscriber, streamName, false);
+                } catch (EventStoreClientTechnicalException e) {
+                    if (e.getMessage().contains("404"))
+                        subscriber.onCompleted();
                 } catch (Exception e) {
                     subscriber.onError(e);
                 }
@@ -79,7 +83,7 @@ public class HttpEventStoreReader implements EventStoreReader<Long> {
                     events.add(event);
                 },
                 (error) -> LOGGER.error(error.getMessage(), error),
-                () -> LOGGER.debug("Dealer projection finished")
+                () -> LOGGER.debug("Projection finished")
         );
 
         if (events.size() == 0)
@@ -132,7 +136,7 @@ public class HttpEventStoreReader implements EventStoreReader<Long> {
         do {
             while (linkProcessor.getUriByRelation(eventStreamData.getLinks(), "previous").equals("")) {
 
-                if (configuration.getProjectionConfiguration().isKeepAlive()) {
+                if (keepAlive) {
                     eventStreamData = dataFetcher.getStreamData(lastLinkProcessed, true);
                     entryProcessor.provideEntriesToSubscriber(eventStreamData.getEntries(), subscriber);
                 } else {
