@@ -38,6 +38,7 @@ import static rx.Observable.create;
  * EventStoreReader implementation pointing to an actual instance of eventstore, via the eventstore
  * JVM client.
  */
+@Deprecated
 public class TcpEventStoreReader implements EventStoreReader<Long> {
 
     /**

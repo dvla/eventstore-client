@@ -51,6 +51,8 @@ public class HttpEventStoreWriter implements EventStoreWriter {
         try {
             String body = mapper.writeValueAsString(addEventRequests);
 
+            LOGGER.debug("Storing events: " + body);
+
             Call<Void> call = eventService.postEvents(expectedVersion,
                     streamName,
                     RequestBody.create(MediaType.parse("text/plain"),
