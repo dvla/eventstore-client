@@ -1,6 +1,6 @@
-package httpeventstore;
+package gov.dvla.osl.eventsourcing.store.http.writer;
 
-import gov.dvla.osl.eventsourcing.store.http.StreamLinkProcessor;
+import gov.dvla.osl.eventsourcing.store.http.reader.StreamLinkProcessor;
 import gov.dvla.osl.eventsourcing.store.http.entity.Link;
 import org.junit.Test;
 

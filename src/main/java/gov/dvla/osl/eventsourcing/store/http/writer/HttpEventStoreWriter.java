@@ -1,20 +1,30 @@
-package gov.dvla.osl.eventsourcing.store.http;
+package gov.dvla.osl.eventsourcing.store.http.writer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import gov.dvla.osl.eventsourcing.api.Event;
+import gov.dvla.osl.eventsourcing.api.EventStoreWriter;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
 import gov.dvla.osl.eventsourcing.exception.EventStoreClientTechnicalException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import retrofit2.Response;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class HttpEventStoreWriter {
+import gov.dvla.osl.eventsourcing.store.http.EventStoreService;
+import gov.dvla.osl.eventsourcing.store.http.ServiceGenerator;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import retrofit2.Call;
+import retrofit2.Response;
+
+public class HttpEventStoreWriter implements EventStoreWriter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpEventStoreWriter.class);
     private static final String WRITING_EVENT_ERROR = "Error in Writing event to event store";
@@ -27,18 +37,28 @@ public class HttpEventStoreWriter {
         this.mapper = mapper;
     }
 
-    public void writeEvents(String streamName, long expectedVersion, List<Event> events) throws IOException {
+    @Override
+    public void store(String streamName, long expectedVersion, List<Event> events) {
 
         EventStoreService eventService = ServiceGenerator.createService(EventStoreService.class, this.configuration);
 
         List<AddEventRequest> addEventRequests = events.stream()
-                .map(this::constructEventRequest)
+                .map((event) -> new AddEventRequest(UUID.randomUUID(),
+                        event.getClass().getTypeName(),
+                        event))
                 .collect(Collectors.toList());
 
         try {
-            final Response<Void> writhingEventsResponse = eventService.postEvents(expectedVersion, streamName, addEventRequests).execute();
+            String body = mapper.writeValueAsString(addEventRequests);
 
-            if (!writhingEventsResponse.isSuccess()) {
+            Call<Void> call = eventService.postEvents(expectedVersion,
+                    streamName,
+                    RequestBody.create(MediaType.parse("text/plain"),
+                            body));
+
+            Response<Void> response = call.execute();
+
+            if (!response.isSuccess()) {
                 LOGGER.error(WRITING_EVENT_ERROR);
                 throw new EventStoreClientTechnicalException(WRITING_EVENT_ERROR);
             }
@@ -49,17 +69,10 @@ public class HttpEventStoreWriter {
         }
     }
 
-    private AddEventRequest constructEventRequest(Event event) {
-
-        AddEventRequest addEventRequest = null;
-        try {
-            addEventRequest = new AddEventRequest(UUID.randomUUID(),
-                    event.getClass().getTypeName(),
-                    mapper.writeValueAsString(event));
-        } catch (JsonProcessingException e) {
-            LOGGER.error(e.toString(), e);
-        }
-
-        return addEventRequest;
+    @Override
+    public void store(String streamName, long expectedVersion, Event event) {
+        List<Event> events = new ArrayList<>();
+        events.add(event);
+        store(streamName, expectedVersion, events);
     }
 }

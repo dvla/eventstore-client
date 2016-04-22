@@ -2,7 +2,12 @@ package gov.dvla.osl.eventsourcing.projection;
 
 import gov.dvla.osl.eventsourcing.api.EventProcessor;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
+import gov.dvla.osl.eventsourcing.impl.DefaultEventDeserialiser;
 import gov.dvla.osl.eventsourcing.store.http.*;
+import gov.dvla.osl.eventsourcing.store.http.reader.HttpEventStoreReader;
+import gov.dvla.osl.eventsourcing.store.http.reader.StreamDataFetcher;
+import gov.dvla.osl.eventsourcing.store.http.reader.StreamEntryProcessor;
+import gov.dvla.osl.eventsourcing.store.http.reader.StreamLinkProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
@@ -14,6 +19,9 @@ import java.util.concurrent.TimeUnit;
 
 /**
  *
+ * This class coordinates all the pieces required to do a projection.  It takes a passed in EventProcessor and
+ * invokes a method on that to process a single event at a time for all the events it retrieves from the
+ * event store.
  */
 public class ProjectionProcessor {
 
@@ -54,7 +62,8 @@ public class ProjectionProcessor {
                 this.configuration,
                 new StreamEntryProcessor(),
                 new StreamLinkProcessor(),
-                new StreamDataFetcher(eventService, this.configuration.getProjectionConfiguration().getLongPollSeconds()));
+                new StreamDataFetcher(eventService, this.configuration.getProjectionConfiguration().getLongPollSeconds()),
+                new DefaultEventDeserialiser());
 
         categoryStream.readStreamEventsForward(getNextVersionNumber).retryWhen(errors -> {
             return errors.flatMap(error -> {

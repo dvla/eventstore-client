@@ -1,4 +1,4 @@
-package gov.dvla.osl.eventsourcing.store.http;
+package gov.dvla.osl.eventsourcing.store.http.reader;
 
 import gov.dvla.osl.eventsourcing.api.LinkProcessor;
 import gov.dvla.osl.eventsourcing.store.http.entity.Link;

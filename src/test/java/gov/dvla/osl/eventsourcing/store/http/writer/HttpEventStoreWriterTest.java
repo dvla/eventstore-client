@@ -1,16 +1,15 @@
-package httpeventstore;
+package gov.dvla.osl.eventsourcing.store.http.writer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import gov.dvla.osl.eventsourcing.api.Event;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
-import gov.dvla.osl.eventsourcing.store.http.HttpEventStoreWriter;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.dvla.osl.memory.SomeEvent;
+import gov.dvla.osl.eventsourcing.store.memory.SomeEvent;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,9 +17,9 @@ import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
-public class HttpHttpEventStoreWriterTest {
+public class HttpEventStoreWriterTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpHttpEventStoreWriterTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpEventStoreWriterTest.class);
 
     private final String STREAM_NAME = "testStream";
     private HttpEventStoreWriter writer;
@@ -59,7 +58,7 @@ public class HttpHttpEventStoreWriterTest {
 
         events.add(new SomeEvent(id, "forename1", "surname1", "email1"));
 
-        writer.writeEvents(STREAM_NAME, 0, events);
+        writer.store(STREAM_NAME, 0, events);
 
         verify(postRequestedFor(urlEqualTo("/streams/testStream")));
     }

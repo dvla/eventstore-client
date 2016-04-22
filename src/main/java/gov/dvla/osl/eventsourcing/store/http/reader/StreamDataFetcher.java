@@ -1,8 +1,10 @@
-package gov.dvla.osl.eventsourcing.store.http;
+package gov.dvla.osl.eventsourcing.store.http.reader;
 
 import gov.dvla.osl.eventsourcing.api.DataFetcher;
 import gov.dvla.osl.eventsourcing.exception.EventStoreClientTechnicalException;
+import gov.dvla.osl.eventsourcing.store.http.EventStoreService;
 import gov.dvla.osl.eventsourcing.store.http.entity.EventStreamData;
+import gov.dvla.osl.eventsourcing.store.http.reader.HttpEventStoreReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import retrofit2.Call;

@@ -1,12 +1,6 @@
 package gov.dvla.osl.eventsourcing.impl;
 
-import gov.dvla.osl.eventsourcing.api.Aggregate;
-import gov.dvla.osl.eventsourcing.api.Command;
-import gov.dvla.osl.eventsourcing.api.Event;
-import gov.dvla.osl.eventsourcing.api.ReflectionUtil;
-import gov.dvla.osl.eventsourcing.store.http.HttpEventStoreWriter;
-import gov.dvla.osl.eventsourcing.api.EventStoreReader;
-import gov.dvla.osl.eventsourcing.api.EventStream;
+import gov.dvla.osl.eventsourcing.api.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -15,19 +9,19 @@ import java.util.UUID;
 
 public class ApplicationService {
     private final EventStoreReader eventStoreReader;
-    private HttpEventStoreWriter httpEventStoreWriter;
+    private EventStoreWriter eventStoreWriter;
     private String streamPrefix;
     private CommandHandlerLookup commandHandlerLookup;
 
-    public ApplicationService(EventStoreReader eventStoreReader, HttpEventStoreWriter httpEventStoreWriter, String streamPrefix, Class<?>... aggregateTypes) {
+    public ApplicationService(EventStoreReader eventStoreReader, EventStoreWriter eventStoreWriter, String streamPrefix, Class<?>... aggregateTypes) {
         this.eventStoreReader = eventStoreReader;
-        this.httpEventStoreWriter = httpEventStoreWriter;
+        this.eventStoreWriter = eventStoreWriter;
         this.streamPrefix = streamPrefix;
         this.commandHandlerLookup = new CommandHandlerLookup(ReflectionUtil.HANDLE_METHOD, aggregateTypes);
     }
 
     public void handle(Command command) throws Exception {
-        EventStream<Long> eventStream = eventStoreReader.loadEventStream(command.aggregateId().toString());
+        EventStream eventStream = eventStoreReader.loadEventStream(this.streamPrefix + "-" + command.aggregateId().toString());
         Object target = newAggregateInstance(command);
         for (Event event : eventStream) {
             ReflectionUtil.invokeHandleMethod(target, event);
@@ -35,8 +29,7 @@ public class ApplicationService {
         ReflectionUtil.invokeHandleMethod(target, command);
         List<Event> events = ((Aggregate) target).getUncommittedEvents();
         if (events != null && events.size() > 0) {
-            httpEventStoreWriter.writeEvents(streamPrefix + "-" + command.aggregateId(), eventStream.version(), events);
-//            eventStore.store(command.aggregateId(), eventStream.version(), events);
+            eventStoreWriter.store(streamPrefix + "-" + command.aggregateId(), eventStream.version(), events);
         }
     }
 

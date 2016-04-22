@@ -43,7 +43,6 @@ public class TcpEventStoreWriter implements EventStoreWriter {
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
     private final ActorSystem system;
-    private final String streamPrefix;
     private final ActorRef connectionActor;
     private final ActorRef writeResult;
     private final ObjectMapper mapper;
@@ -52,13 +51,11 @@ public class TcpEventStoreWriter implements EventStoreWriter {
 
     /**
      * Standard constructor
-     * @param streamPrefix - prefix for the stream to read/write
      * @param mapper - object mapper which we will use for encoding events
      * @param config - configuration object for the eventstore client
      */
-    public TcpEventStoreWriter(final String streamPrefix, final ObjectMapper mapper,
+    public TcpEventStoreWriter(final ObjectMapper mapper,
                                 final EventStoreConfiguration config) {
-        this.streamPrefix = streamPrefix;
         this.mapper = mapper;
         this.timeoutSeconds = config.getTimeoutSeconds();
 
@@ -83,10 +80,10 @@ public class TcpEventStoreWriter implements EventStoreWriter {
     }
 
     @Override
-    public void store(String aggregateId, long expectedVersion, List<Event> events) {
+    public void store(String streamName, long expectedVersion, List<Event> events) {
         final CompletableFuture<WriteEventsCompleted> future = new CompletableFuture<>();
         final ActorRef writeResult = system.actorOf(Props.create(NotifyingWriteResult.class, future));
-        store(aggregateId, expectedVersion, events, writeResult);
+        store(streamName, expectedVersion, events, writeResult);
 
         try {
             future.get(this.timeoutSeconds, TimeUnit.SECONDS);
@@ -96,8 +93,13 @@ public class TcpEventStoreWriter implements EventStoreWriter {
         }
     }
 
-    private void store(String aggregateId, long version, List<Event> events, ActorRef writeResult) {
-        WriteEventsBuilder builder = new WriteEventsBuilder(streamPrefix + aggregateId);
+    @Override
+    public void store(String streamName, long expectedVersion, Event event) {
+
+    }
+
+    private void store(String streamName, long version, List<Event> events, ActorRef writeResult) {
+        WriteEventsBuilder builder = new WriteEventsBuilder(streamName);
         for (Event event : events) {
             builder = builder.addEvent(toEventData(event));
         }

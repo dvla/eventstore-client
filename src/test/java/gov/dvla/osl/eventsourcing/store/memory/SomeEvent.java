@@ -1,4 +1,4 @@
-package uk.gov.dvla.osl.memory;
+package gov.dvla.osl.eventsourcing.store.memory;
 
 import gov.dvla.osl.eventsourcing.api.Event;
 

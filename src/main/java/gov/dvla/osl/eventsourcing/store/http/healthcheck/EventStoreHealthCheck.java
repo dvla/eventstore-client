@@ -1,6 +1,7 @@
-package gov.dvla.osl.eventsourcing.store.http;
+package gov.dvla.osl.eventsourcing.store.http.healthcheck;
 
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
+import gov.dvla.osl.eventsourcing.store.http.EventStoreService;
 import gov.dvla.osl.eventsourcing.store.http.entity.HealthCheck;
 import okhttp3.HttpUrl;
 import retrofit2.Call;

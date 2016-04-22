@@ -5,7 +5,7 @@ import rx.Observable;
 import rx.functions.Func0;
 
 public interface EventStoreReader<V> {
-	EventStream<Long> loadEventStream(String aggregateId);
+    EventStream loadEventStream(String streamName);
 	Observable<EventStoreEvent> all();
 	Observable<EventStoreEvent> streamFrom(String streamName);
 	Observable<Entry> readStreamEventsForward(Func0<Integer> getNextVersionNumber);

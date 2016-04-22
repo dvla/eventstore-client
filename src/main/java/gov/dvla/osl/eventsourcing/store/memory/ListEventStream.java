@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ListEventStream implements EventStream<Long> {
+public class ListEventStream implements EventStream {
 	private final long version;
 	private final List<Event> events;
 	
@@ -38,5 +38,4 @@ public class ListEventStream implements EventStream<Long> {
 	public Long version() {
 		return version;
 	}
-	
 }

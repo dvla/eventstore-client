@@ -7,6 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.UUID;
 
+@Deprecated
 public class BlockingApplicationService {
 
     private final EventStoreReader eventStoreReader;
@@ -20,7 +21,7 @@ public class BlockingApplicationService {
     }
 
     public void handle(Command command) throws Exception {
-        EventStream<Long> eventStream = eventStoreReader.loadEventStream(command.aggregateId().toString());
+        EventStream eventStream = eventStoreReader.loadEventStream(command.aggregateId().toString());
         Object target = newAggregateInstance(command);
         for (Event event : eventStream) {
             ReflectionUtil.invokeHandleMethod(target, event);

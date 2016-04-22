@@ -1,6 +1,5 @@
-package uk.gov.dvla.osl.memory;
+package gov.dvla.osl.eventsourcing.store.memory;
 
-import gov.dvla.osl.eventsourcing.store.memory.InMemoryEventStoreWriter;
 import org.junit.Test;
 import gov.dvla.osl.eventsourcing.api.Event;
 import gov.dvla.osl.eventsourcing.api.EventStream;
@@ -15,16 +14,16 @@ public class InMemoryEventStoreReaderTest {
 
     @Test
     public void test() throws Exception {
-        InMemoryEventStoreWriter es = new InMemoryEventStoreWriter();
+        InMemoryEventStore es = new InMemoryEventStore();
         es.store(driverId.toString(), 0, Arrays.asList(new SomeEvent(driverId, "forename", "surname", "email")));
         Thread.sleep(1);
         es.store(driverId.toString(), 1, Arrays.asList(new SomeEvent(driverId, "forename", "surname", "email")));
-        EventStream<Long> stream = es.loadEventsAfter(0L);
+        EventStream stream = es.loadEventsAfter(0L);
         assertEquals(1, countEvents(stream));
         Long id = stream.version();
     }
 
-    private int countEvents(EventStream<Long> stream) {
+    private int countEvents(EventStream stream) {
         int result = 0;
         for (Event event : stream) {
             result++;
