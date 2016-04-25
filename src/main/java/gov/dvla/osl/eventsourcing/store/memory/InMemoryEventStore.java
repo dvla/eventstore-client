@@ -13,7 +13,7 @@ public class InMemoryEventStore implements EventStore<Long> {
     final TreeSet<Transaction> transactions = new TreeSet<Transaction>();
 
     @Override
-    public ListEventStream loadEventStream(String aggregateId) {
+    public ListEventStream loadEventStream(final String aggregateId) {
         ListEventStream eventStream = streams.get(aggregateId);
         if (eventStream == null) {
             eventStream = new ListEventStream();
@@ -22,11 +22,11 @@ public class InMemoryEventStore implements EventStore<Long> {
         return eventStream;
     }
 
-    public EventStream loadEventsAfter(Long timestamp) {
+    public EventStream loadEventsAfter(final Long timestamp) {
         // include all events after this timestamp, except the events with the current timestamp
         // since new events might be added with the current timestamp
-        List<Event> events = new LinkedList<>();
-        long now;
+        final List<Event> events = new LinkedList<>();
+        final long now;
         synchronized (transactions) {
             now = System.currentTimeMillis();
             for (Transaction t : transactions.tailSet(new Transaction(timestamp)).headSet(new Transaction(now))) {
@@ -37,28 +37,17 @@ public class InMemoryEventStore implements EventStore<Long> {
     }
 
     @Override
-    public Observable<EventStoreEvent> all() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Observable<EventStoreEvent> streamFrom(String streamName) {
-        return null;
-    }
-
-    @Override
     public Observable<Entry> readStreamEventsForward(Func0<Integer> getNextVersionNumber) {
         return null;
     }
 
     @Override
     public void shutdown() {
-
     }
 
     @Override
-    public void store(String streamName, long expectedVersion, List<Event> events) {
-        ListEventStream stream = loadEventStream(streamName);
+    public void store(final String streamName, final long expectedVersion, final List<Event> events) {
+        final ListEventStream stream = loadEventStream(streamName);
         if (stream.version() != expectedVersion) {
             throw new ConcurrentModificationException("Stream has already been modified.  Stream.version=" + stream.version() + ", expectedVersion=" + expectedVersion);
         }
@@ -69,7 +58,9 @@ public class InMemoryEventStore implements EventStore<Long> {
     }
 
     @Override
-    public void store(String streamName, long expectedVersion, Event event) {
-
+    public void store(final String streamName, final long expectedVersion, final Event event) {
+        final List<Event> events = new ArrayList<>();
+        events.add(event);
+        store(streamName, expectedVersion, events);
     }
 }

@@ -9,18 +9,18 @@ class Transaction implements Comparable<Transaction> {
     public final List<? extends Event> events;
     private final long timestamp;
 
-    public Transaction(long timestamp) {
+    public Transaction(final long timestamp) {
         events = Collections.emptyList();
         this.timestamp = timestamp;
 
     }
-    public Transaction(List<? extends Event> events) {
+    public Transaction(final List<? extends Event> events) {
         this.events = events;
         this.timestamp = System.currentTimeMillis();
     }
 
     @Override
-    public int compareTo(Transaction other) {
+    public int compareTo(final Transaction other) {
         if (timestamp < other.timestamp) {
             return -1;
         } else if (timestamp > other.timestamp) {

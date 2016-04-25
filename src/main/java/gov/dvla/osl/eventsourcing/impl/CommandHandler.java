@@ -10,21 +10,21 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.UUID;
 
-public class ApplicationService {
+public class CommandHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandHandler.class);
 
     private final EventStoreReader eventStoreReader;
-    private EventStoreWriter eventStoreWriter;
-    private String streamPrefix;
-    private ObjectMapper mapper;
-    private CommandHandlerLookup commandHandlerLookup;
+    private final EventStoreWriter eventStoreWriter;
+    private final String streamPrefix;
+    private final ObjectMapper mapper;
+    private final CommandHandlerLookup commandHandlerLookup;
 
-    public ApplicationService(EventStoreReader eventStoreReader,
-                              EventStoreWriter eventStoreWriter,
-                              String streamPrefix,
-                              ObjectMapper mapper,
-                              Class<?>... aggregateTypes) {
+    public CommandHandler(final EventStoreReader eventStoreReader,
+                          final EventStoreWriter eventStoreWriter,
+                          final String streamPrefix,
+                          final ObjectMapper mapper,
+                          final Class<?>... aggregateTypes) {
         this.eventStoreReader = eventStoreReader;
         this.eventStoreWriter = eventStoreWriter;
         this.streamPrefix = streamPrefix;
@@ -32,8 +32,8 @@ public class ApplicationService {
         this.commandHandlerLookup = new CommandHandlerLookup(ReflectionUtil.HANDLE_METHOD, aggregateTypes);
     }
 
-    public void handle(Command command) throws Exception {
-        EventStream eventStream = eventStoreReader.loadEventStream(this.streamPrefix + "-" + command.aggregateId().toString());
+    public void handle(final Command command) throws Exception {
+        final EventStream eventStream = eventStoreReader.loadEventStream(this.streamPrefix + "-" + command.aggregateId().toString());
         Object target = newAggregateInstance(command);
         for (Event event : eventStream) {
             LOGGER.debug("Applying event: " + event.getClass() + " " + mapper.writeValueAsString(event));

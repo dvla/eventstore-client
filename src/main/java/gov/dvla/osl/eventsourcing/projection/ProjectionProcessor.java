@@ -2,12 +2,7 @@ package gov.dvla.osl.eventsourcing.projection;
 
 import gov.dvla.osl.eventsourcing.api.EventProcessor;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
-import gov.dvla.osl.eventsourcing.impl.DefaultEventDeserialiser;
-import gov.dvla.osl.eventsourcing.store.http.*;
 import gov.dvla.osl.eventsourcing.store.http.reader.HttpEventStoreReader;
-import gov.dvla.osl.eventsourcing.store.http.reader.StreamDataFetcher;
-import gov.dvla.osl.eventsourcing.store.http.reader.StreamEntryProcessor;
-import gov.dvla.osl.eventsourcing.store.http.reader.StreamLinkProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
@@ -56,14 +51,7 @@ public class ProjectionProcessor {
      */
     public void projectEvents(Func0<Integer> getNextVersionNumber) throws IOException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
 
-        EventStoreService eventService = ServiceGenerator.createService(EventStoreService.class, this.configuration);
-
-        categoryStream = new HttpEventStoreReader(
-                this.configuration,
-                new StreamEntryProcessor(),
-                new StreamLinkProcessor(),
-                new StreamDataFetcher(eventService, this.configuration.getProjectionConfiguration().getLongPollSeconds()),
-                new DefaultEventDeserialiser());
+        categoryStream = new HttpEventStoreReader(configuration);
 
         categoryStream.readStreamEventsForward(getNextVersionNumber).retryWhen(errors -> {
             return errors.flatMap(error -> {

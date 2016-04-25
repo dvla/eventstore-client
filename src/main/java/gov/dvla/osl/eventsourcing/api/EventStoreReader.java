@@ -6,8 +6,6 @@ import rx.functions.Func0;
 
 public interface EventStoreReader<V> {
     EventStream loadEventStream(String streamName);
-	Observable<EventStoreEvent> all();
-	Observable<EventStoreEvent> streamFrom(String streamName);
 	Observable<Entry> readStreamEventsForward(Func0<Integer> getNextVersionNumber);
     void shutdown();
 }

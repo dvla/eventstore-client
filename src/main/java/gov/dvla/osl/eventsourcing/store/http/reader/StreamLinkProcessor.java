@@ -8,10 +8,10 @@ import java.util.List;
 public class StreamLinkProcessor implements LinkProcessor {
 
     @Override
-    public String getUriByRelation(List<Link> links, String name) {
-        for (int i = 0; i < links.size(); i++) {
-            if (links.get(i).getRelation().equals(name))
-                return links.get(i).getUri();
+    public String getUriByRelation(List<Link> links, String relationName) {
+        for (Link link : links) {
+            if (link.getRelation().equals(relationName))
+                return link.getUri();
         }
         return "";
     }

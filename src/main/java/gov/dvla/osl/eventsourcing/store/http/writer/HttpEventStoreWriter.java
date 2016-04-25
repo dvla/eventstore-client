@@ -29,27 +29,27 @@ public class HttpEventStoreWriter implements EventStoreWriter {
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpEventStoreWriter.class);
     private static final String WRITING_EVENT_ERROR = "Error in Writing event to event store";
 
-    private EventStoreConfiguration configuration;
+    private final EventStoreConfiguration configuration;
     private final ObjectMapper mapper;
 
-    public HttpEventStoreWriter(EventStoreConfiguration configuration, final ObjectMapper mapper) {
+    public HttpEventStoreWriter(final EventStoreConfiguration configuration, final ObjectMapper mapper) {
         this.configuration = configuration;
         this.mapper = mapper;
     }
 
     @Override
-    public void store(String streamName, long expectedVersion, List<Event> events) {
+    public void store(final String streamName, final long expectedVersion, final List<Event> events) {
 
-        EventStoreService eventService = ServiceGenerator.createService(EventStoreService.class, this.configuration);
+        final EventStoreService eventService = ServiceGenerator.createService(EventStoreService.class, this.configuration);
 
-        List<AddEventRequest> addEventRequests = events.stream()
+        final List<AddEventRequest> addEventRequests = events.stream()
                 .map((event) -> new AddEventRequest(UUID.randomUUID(),
                         event.getClass().getTypeName(),
                         event))
                 .collect(Collectors.toList());
 
         try {
-            String body = mapper.writeValueAsString(addEventRequests);
+            final String body = mapper.writeValueAsString(addEventRequests);
 
             LOGGER.debug("Storing events: " + body);
 
@@ -72,8 +72,8 @@ public class HttpEventStoreWriter implements EventStoreWriter {
     }
 
     @Override
-    public void store(String streamName, long expectedVersion, Event event) {
-        List<Event> events = new ArrayList<>();
+    public void store(final String streamName, final long expectedVersion, final Event event) {
+        final List<Event> events = new ArrayList<>();
         events.add(event);
         store(streamName, expectedVersion, events);
     }

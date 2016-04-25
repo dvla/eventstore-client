@@ -8,7 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CommandHandlerLookup {
-	private Map<Class<? extends Command>, Class<?>> commandHandlers = new HashMap<Class<? extends Command>, Class<?>>();
+
+	private Map<Class<? extends Command>, Class<?>> commandHandlers = new HashMap<>();
 
 	@SuppressWarnings("unchecked")
 	public CommandHandlerLookup(String methodName, Class<?>... aggregateTypes) {
