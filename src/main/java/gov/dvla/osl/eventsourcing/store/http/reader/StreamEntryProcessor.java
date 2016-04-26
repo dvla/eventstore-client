@@ -18,7 +18,7 @@ public class StreamEntryProcessor implements EntryProcessor {
      */
     private static final String HARD_DELETED_EVENT_TYPE = "$metadata";
 
-    public void provideEntriesToSubscriber(List<Entry> entries, Subscriber subscriber) {
+    public void provideEntriesToSubscriber(final List<Entry> entries, final Subscriber subscriber) {
         entries.stream()
                 .sorted((o1, o2) -> o1.getEventNumber() - o2.getEventNumber())
                 .filter(this::validEvent)
@@ -28,7 +28,7 @@ public class StreamEntryProcessor implements EntryProcessor {
                 });
     }
 
-    private boolean validEvent(Entry entry) {
+    private boolean validEvent(final Entry entry) {
         return entry != null &&
                     entry.getEventNumber() != null &&
                     entry.getEventType() != null &&

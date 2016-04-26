@@ -1,7 +1,6 @@
 package gov.dvla.osl.eventsourcing.configuration;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;

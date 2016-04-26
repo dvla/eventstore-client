@@ -53,12 +53,12 @@ public class HttpEventStoreWriter implements EventStoreWriter {
 
             LOGGER.debug("Storing events: " + body);
 
-            Call<Void> call = eventService.postEvents(expectedVersion,
+            final Call<Void> call = eventService.postEvents(expectedVersion,
                     streamName,
                     RequestBody.create(MediaType.parse("text/plain"),
                             body));
 
-            Response<Void> response = call.execute();
+            final Response<Void> response = call.execute();
 
             if (!response.isSuccess()) {
                 LOGGER.error(WRITING_EVENT_ERROR);

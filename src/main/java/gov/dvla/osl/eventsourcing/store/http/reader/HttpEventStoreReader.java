@@ -85,7 +85,7 @@ public class HttpEventStoreReader implements EventStoreReader<Long> {
             return new ListEventStream(lastEventNumber[0], events);
     }
 
-    public Observable<Entry> readStreamEventsForward(Func0<Integer> getNextVersionNumber) {
+    public Observable<Entry> readStreamEventsForward(final Func0<Integer> getNextVersionNumber) {
         return Observable.create(new Observable.OnSubscribe<Entry>() {
             @Override
             public void call(Subscriber<? super Entry> subscriber) {

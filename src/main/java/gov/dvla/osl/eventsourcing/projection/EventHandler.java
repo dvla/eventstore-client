@@ -33,7 +33,7 @@ public abstract class EventHandler<T> {
 
     public void handle(final Event event) throws EventHandlerException {
         if (methodHandles.containsKey(event.getClass())) {
-            MethodHandle methodHandle = methodHandles.get(event.getClass());
+            final MethodHandle methodHandle = methodHandles.get(event.getClass());
             try {
                 methodHandle.invoke(this, event);
             } catch (Throwable throwable) {
@@ -47,8 +47,8 @@ public abstract class EventHandler<T> {
     @SuppressWarnings("unchecked")
     private Class<T> getGenericTypeClass() {
         try {
-            String className = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0].getTypeName();
-            Class<?> clazz = Class.forName(className);
+            final String className = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0].getTypeName();
+            final Class<?> clazz = Class.forName(className);
             return (Class<T>) clazz;
         } catch (Exception e) {
             throw new IllegalStateException("Class is not parametrized with generic type!!! Please use extends <> ");

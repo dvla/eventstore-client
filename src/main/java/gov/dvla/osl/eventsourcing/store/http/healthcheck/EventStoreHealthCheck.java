@@ -13,9 +13,9 @@ import java.io.IOException;
 
 public class EventStoreHealthCheck {
 
-    Retrofit retrofit;
+    final Retrofit retrofit;
 
-    public EventStoreHealthCheck(EventStoreConfiguration configuration) {
+    public EventStoreHealthCheck(final EventStoreConfiguration configuration) {
 
         HttpUrl httpUrl = new HttpUrl.Builder()
                 .scheme(configuration.getScheme())
@@ -31,12 +31,12 @@ public class EventStoreHealthCheck {
 
     public boolean check() {
 
-        EventStoreService service = retrofit.create(EventStoreService.class);
+        final EventStoreService service = retrofit.create(EventStoreService.class);
 
-        Call<HealthCheck> ping = service.ping();
+        final Call<HealthCheck> ping = service.ping();
 
         try {
-            Response<HealthCheck> response = ping.execute();
+            final Response<HealthCheck> response = ping.execute();
              return response.isSuccess();
         } catch (IOException e) {
             return false;

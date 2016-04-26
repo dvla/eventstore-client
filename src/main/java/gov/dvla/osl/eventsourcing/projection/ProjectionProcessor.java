@@ -25,8 +25,8 @@ public class ProjectionProcessor {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ProjectionProcessor.class);
 
-    private EventStoreConfiguration configuration;
-    private EventProcessor eventProcessor;
+    private final EventStoreConfiguration configuration;
+    private final EventProcessor eventProcessor;
     private HttpEventStoreReader categoryStream;
 
     /**

@@ -39,7 +39,7 @@ public class StreamDataProcessor implements DataProcessor {
                             final boolean keepAlive,
                             int nextVersionNumber) throws Exception {
 
-        String headUrl = String.format(HEAD_URL, streamName, nextVersionNumber, configuration.getProjectionConfiguration().getPageSize());
+        final String headUrl = String.format(HEAD_URL, streamName, nextVersionNumber, configuration.getProjectionConfiguration().getPageSize());
 
         EventStreamData eventStreamData = dataFetcher.getStreamData(headUrl, DONT_LONGPOLL);
         entryProcessor.provideEntriesToSubscriber(eventStreamData.getEntries(), subscriber);

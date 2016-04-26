@@ -34,14 +34,14 @@ public class CommandHandler {
 
     public void handle(final Command command) throws Exception {
         final EventStream eventStream = eventStoreReader.loadEventStream(this.streamPrefix + "-" + command.aggregateId().toString());
-        Object target = newAggregateInstance(command);
+        final Object target = newAggregateInstance(command);
         for (Event event : eventStream) {
             LOGGER.debug("Applying event: " + event.getClass() + " " + mapper.writeValueAsString(event));
             ReflectionUtil.invokeHandleMethod(target, event);
         }
         LOGGER.debug("Invoking command: " + command.getClass() + " " + mapper.writeValueAsString(command));
         ReflectionUtil.invokeHandleMethod(target, command);
-        List<Event> events = ((Aggregate) target).getUncommittedEvents();
+        final List<Event> events = ((Aggregate) target).getUncommittedEvents();
         if (events != null && events.size() > 0) {
             eventStoreWriter.store(streamPrefix + "-" + command.aggregateId(), eventStream.version(), events);
         } else {
@@ -49,9 +49,9 @@ public class CommandHandler {
         }
     }
 
-    private Object newAggregateInstance(Command command) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        Class<?> clazz = commandHandlerLookup.targetType(command);
-        Constructor<?> ctor = clazz.getConstructor(UUID.class);
+    private Object newAggregateInstance(final Command command) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        final Class<?> clazz = commandHandlerLookup.targetType(command);
+        final Constructor<?> ctor = clazz.getConstructor(UUID.class);
         LOGGER.debug("Creating aggregate: " + clazz);
         return ctor.newInstance(command.aggregateId());
     }

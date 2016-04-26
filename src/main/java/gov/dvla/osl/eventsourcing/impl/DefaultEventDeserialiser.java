@@ -18,7 +18,7 @@ public class DefaultEventDeserialiser implements EventDeserialiser {
     }
 
     @Override
-    public Event deserialise(String data, String eventType)  {
+    public Event deserialise(final String data, final String eventType)  {
 
         Class clazz;
         try {

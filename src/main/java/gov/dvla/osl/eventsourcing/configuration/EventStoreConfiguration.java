@@ -7,8 +7,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * The event store configuration.
  *
@@ -115,12 +113,6 @@ public class EventStoreConfiguration {
     private String healthCheckUrl;
 
     /**
-     * Cluster configuration (optional but needed if we want to talk to an eventstore cluster).
-     */
-    @JsonProperty
-    private EventStoreClusterConfiguration cluster;
-
-    /**
      * Constructor.
      */
     public EventStoreConfiguration() {
@@ -222,21 +214,5 @@ public class EventStoreConfiguration {
      */
     public String getHealthCheckUrl() {
         return healthCheckUrl;
-    }
-
-    /**
-     * Return the eventstore cluster configuration.
-     * @return eventstore cluster configuration
-     */
-    public EventStoreClusterConfiguration getCluster() {
-        return cluster;
-    }
-
-    /**
-     * Set the eventstore cluster configuration.
-     * @param cluster - the new cluster configuration
-     */
-    public void setCluster(EventStoreClusterConfiguration cluster) {
-        this.cluster = cluster;
     }
 }

@@ -5,5 +5,5 @@ import gov.dvla.osl.eventsourcing.store.http.entity.Link;
 import java.util.List;
 
 public interface LinkProcessor {
-    String getUriByRelation(List<Link> links, String relationName);
+    String getUriByRelation(final List<Link> links, final String relationName);
 }
