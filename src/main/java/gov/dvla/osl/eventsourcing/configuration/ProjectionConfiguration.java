@@ -1,7 +1,6 @@
 package gov.dvla.osl.eventsourcing.configuration;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -31,7 +30,6 @@ public class ProjectionConfiguration {
     /**
      * The stream.
      */
-    @NotEmpty
     @JsonProperty
     private String stream;
 
@@ -52,17 +50,6 @@ public class ProjectionConfiguration {
     public ProjectionConfiguration() {
         // Noop for Dropwizard config
     }
-
-    /**
-     * Constructor.
-     * @param host the host
-     * @param port the port
-     * @param userId the user id
-     * @param password the password
-     */
-//    public ProjectionConfiguration(final String host, final int port, final String stream, final String healthcheckUrl, final String userId, final String password) {
-//        this.stream = stream;
-//    }
 
     /**
      * Get stream.

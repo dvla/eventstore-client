@@ -1,5 +1,6 @@
 package gov.dvla.osl.eventsourcing.api;
 
-public interface EventStream<V> extends Iterable<Event> {
-	V version();
+public interface EventStream extends Iterable<Event> {
+	Long version();
 }
+

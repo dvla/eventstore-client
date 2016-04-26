@@ -11,7 +11,7 @@ public class EventStoreEvent {
 
     private EventDeserialiser eventDeserialiser;
 
-    public EventStoreEvent(EventDeserialiser eventDeserialiser) {
+    public EventStoreEvent(final EventDeserialiser eventDeserialiser) {
         this.eventDeserialiser = eventDeserialiser;
     }
 

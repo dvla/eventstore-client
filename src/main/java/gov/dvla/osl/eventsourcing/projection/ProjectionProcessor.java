@@ -2,7 +2,7 @@ package gov.dvla.osl.eventsourcing.projection;
 
 import gov.dvla.osl.eventsourcing.api.EventProcessor;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
-import gov.dvla.osl.eventsourcing.store.httpeventstore.*;
+import gov.dvla.osl.eventsourcing.store.http.reader.HttpEventStoreReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;
@@ -14,6 +14,9 @@ import java.util.concurrent.TimeUnit;
 
 /**
  *
+ * This class coordinates all the pieces required to do a projection.  It takes a passed in EventProcessor and
+ * invokes a method on that to process a single event at a time for all the events it retrieves from the
+ * event store.
  */
 public class ProjectionProcessor {
 
@@ -22,9 +25,9 @@ public class ProjectionProcessor {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ProjectionProcessor.class);
 
-    private EventStoreConfiguration configuration;
-    private EventProcessor eventProcessor;
-    private EventStoreStream categoryStream;
+    private final EventStoreConfiguration configuration;
+    private final EventProcessor eventProcessor;
+    private HttpEventStoreReader categoryStream;
 
     /**
      * Constructor.
@@ -48,13 +51,7 @@ public class ProjectionProcessor {
      */
     public void projectEvents(Func0<Integer> getNextVersionNumber) throws IOException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
 
-        EventStoreService eventService = ServiceGenerator.createService(EventStoreService.class, this.configuration);
-
-        categoryStream = new EventStoreStream(
-                this.configuration,
-                new StreamEntryProcessor(),
-                new StreamLinkProcessor(),
-                new StreamDataFetcher(eventService, this.configuration.getProjectionConfiguration().getLongPollSeconds()));
+        categoryStream = new HttpEventStoreReader(configuration);
 
         categoryStream.readStreamEventsForward(getNextVersionNumber).retryWhen(errors -> {
             return errors.flatMap(error -> {
@@ -65,7 +62,7 @@ public class ProjectionProcessor {
         }).subscribe(
             (event) -> eventProcessor.processEvent(event),
             (error) -> LOGGER.error(error.getMessage(), error),
-            () -> LOGGER.debug("Dealer projection finished")
+            () -> LOGGER.debug("Projection finished")
         );
     }
 

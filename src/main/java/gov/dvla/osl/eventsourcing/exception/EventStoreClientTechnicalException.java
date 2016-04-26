@@ -10,7 +10,7 @@ package gov.dvla.osl.eventsourcing.exception;
  */
 
 public class EventStoreClientTechnicalException extends RuntimeException {
-    public EventStoreClientTechnicalException(String message) {
+    public EventStoreClientTechnicalException(final String message) {
         super(message);
     }
 }

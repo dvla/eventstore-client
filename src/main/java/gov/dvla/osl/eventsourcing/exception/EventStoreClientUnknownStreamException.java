@@ -11,7 +11,7 @@ package gov.dvla.osl.eventsourcing.exception;
  */
 public class EventStoreClientUnknownStreamException extends RuntimeException {
 
-    public EventStoreClientUnknownStreamException(String message) {
+    public EventStoreClientUnknownStreamException(final String message) {
         super(message);
     }
 }
