@@ -179,14 +179,19 @@ public class StreamEntryProcessorTest {
         List<Entry> entries = new ArrayList<>();
 
         Entry entryOne = new Entry();
-        entryOne.setEventNumber(1);
+        entryOne.setEventNumber(0);
         entryOne.setEventType("validtype");
 
         Entry entryTwo = new Entry();
-        entryTwo.setEventNumber(0);
+        entryTwo.setEventNumber(1);
         entryTwo.setEventType("validtype");
 
+        Entry entryThree = new Entry();
+        entryThree.setEventNumber(2);
+        entryThree.setEventType("validtype");
+
         // Add the entries in reverse order
+        entries.add(entryThree);
         entries.add(entryTwo);
         entries.add(entryOne);
 
@@ -202,5 +207,6 @@ public class StreamEntryProcessorTest {
         //
         inOrder.verify(subscriber).onNext(entryOne);
         inOrder.verify(subscriber).onNext(entryTwo);
+        inOrder.verify(subscriber).onNext(entryThree);
     }
 }

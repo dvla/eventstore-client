@@ -19,13 +19,19 @@ public class StreamEntryProcessor implements EntryProcessor {
     private static final String HARD_DELETED_EVENT_TYPE = "$metadata";
 
     public void provideEntriesToSubscriber(List<Entry> entries, Subscriber subscriber) {
+        entries.stream()
+                .sorted((o1, o2) -> o1.getEventNumber() - o2.getEventNumber())
+                .filter(this::validEvent)
+                .forEach(event -> {
+                    LOGGER.debug("Calling subscriber.onNext with event number " + event.getEventNumber());
+                    subscriber.onNext(event);
+                });
+    }
 
-        for (int i = entries.size() - 1; i > -1; i--) {
-            Entry entry = entries.get(i);
-            if (entry != null && entry.getEventNumber() != null && entry.getEventType() != null && !entry.getEventType().equals(HARD_DELETED_EVENT_TYPE)) {
-                LOGGER.debug("Calling subscriber.onNext with " + entries.get(i).getEventType());
-                subscriber.onNext(entry);
-            }
-        }
+    private boolean validEvent(Entry entry) {
+        return entry != null &&
+                    entry.getEventNumber() != null &&
+                    entry.getEventType() != null &&
+                    !entry.getEventType().equals(HARD_DELETED_EVENT_TYPE);
     }
 }
