@@ -20,7 +20,7 @@ public class EventStoreHealthCheck {
         HttpUrl httpUrl = new HttpUrl.Builder()
                 .scheme(configuration.getScheme())
                 .host(configuration.getHost())
-                .port(configuration.getHttpPort())
+                .port(configuration.getPort())
                 .build();
 
         retrofit = new Retrofit.Builder()

@@ -27,7 +27,7 @@ public class HttpEventStoreWriterTest {
 
     private static final String SCHEME = "http";
     private static final String HOST = "localhost";
-    private static final Integer PORT = 2113;
+    private static final Integer PORT = 2115;
     private static final String USERNAME = "testUser";
     private static final String PASSWORD = "pass";
     private static final String PATH = "/streams/.+";

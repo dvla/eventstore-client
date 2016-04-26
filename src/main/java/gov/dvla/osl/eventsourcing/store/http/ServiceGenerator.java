@@ -39,7 +39,7 @@ public class ServiceGenerator {
         final HttpUrl httpUrl = new HttpUrl.Builder()
                 .scheme(configuration.getScheme())
                 .host(configuration.getHost())
-                .port(configuration.getHttpPort())
+                .port(configuration.getPort())
                 .build();
 
         final Retrofit retrofit = builder.baseUrl(httpUrl).client(client).build();

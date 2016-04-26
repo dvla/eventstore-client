@@ -25,8 +25,7 @@ public class EventStoreConfiguration {
     /**
      * Default value for port.
      */
-    private static final int DEFAULT_PORT = 1113;
-    private static final int DEFAULT_HTTP_PORT = 2113;
+    private static final int DEFAULT_PORT = 2113;
 
     /**
      * Maximum number for the reconnect attempts.
@@ -64,11 +63,6 @@ public class EventStoreConfiguration {
     @Max(MAX_PORT)
     @JsonProperty
     private int port = DEFAULT_PORT;
-
-    @Min(1)
-    @Max(MAX_PORT)
-    @JsonProperty
-    private int httpPort = DEFAULT_HTTP_PORT;
 
     /**
      * The user id.
@@ -126,7 +120,10 @@ public class EventStoreConfiguration {
      * @param userId the user id
      * @param password the password
      */
-    public EventStoreConfiguration(final String scheme, final String host, final int port, final String userId,
+    public EventStoreConfiguration(final String scheme,
+                                   final String host,
+                                   final int port,
+                                   final String userId,
                                    final String password) {
         this.scheme = scheme;
         this.host = host;
@@ -157,14 +154,6 @@ public class EventStoreConfiguration {
      */
     public int getPort() {
         return port;
-    }
-
-    /**
-     * Get httpPort.
-     * @return httpPort
-     */
-    public int getHttpPort() {
-        return httpPort;
     }
 
     /**
