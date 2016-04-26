@@ -66,7 +66,7 @@ public abstract class EventHandler<T> {
         }
     }
 
-    private class HandlerMethodMapping<T extends Event> {
+    private final class HandlerMethodMapping<T extends Event> {
 
         private final Class<T> clazz;
         private final MethodHandle methodHandle;
