@@ -20,8 +20,8 @@ public class StreamEntryProcessor implements EntryProcessor {
 
     public void provideEntriesToSubscriber(final List<Entry> entries, final Subscriber subscriber) {
         entries.stream()
-                .sorted((o1, o2) -> o1.getEventNumber() - o2.getEventNumber())
                 .filter(this::validEvent)
+                .sorted((o1, o2) -> o1.getEventNumber() - o2.getEventNumber())
                 .forEach(event -> {
                     LOGGER.debug("Calling subscriber.onNext with event number " + event.getEventNumber());
                     subscriber.onNext(event);

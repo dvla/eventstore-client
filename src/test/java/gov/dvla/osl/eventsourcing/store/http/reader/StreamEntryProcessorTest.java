@@ -43,10 +43,15 @@ public class StreamEntryProcessorTest {
 
         List<Entry> entries = new ArrayList<>();
 
-        Entry entry = new Entry();
-        entry.setEventNumber(null);
-        entry.setEventType("sometype");
-        entries.add(entry);
+        Entry entryOne = new Entry();
+        entryOne.setEventNumber(null);
+        entryOne.setEventType(null);
+        entries.add(entryOne);
+
+        Entry entryTwo = new Entry();
+        entryTwo.setEventNumber(null);
+        entryTwo.setEventType(null);
+        entries.add(entryTwo);
 
         Subscriber subscriber = mock(Subscriber.class);
 
@@ -56,7 +61,8 @@ public class StreamEntryProcessorTest {
 
         // Assert
         //
-        verify(subscriber, never()).onNext(entry);
+        verify(subscriber, never()).onNext(entryOne);
+        verify(subscriber, never()).onNext(entryTwo);
     }
 
     @Test
