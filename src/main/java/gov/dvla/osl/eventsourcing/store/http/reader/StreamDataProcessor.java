@@ -9,9 +9,7 @@ import gov.dvla.osl.eventsourcing.store.http.entity.EventStreamData;
 import gov.dvla.osl.eventsourcing.store.http.entity.Link;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import retrofit2.http.HEAD;
 import rx.Subscriber;
-import rx.functions.Func2;
 
 import java.io.IOException;
 import java.util.List;
