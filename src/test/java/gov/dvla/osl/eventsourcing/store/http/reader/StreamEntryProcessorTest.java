@@ -23,6 +23,9 @@ public class StreamEntryProcessorTest {
         List<Entry> entries = new ArrayList<>();
         entries.add(null);
 
+        Entry validEntry = constructValidEntry(1);
+        entries.add(validEntry);
+
         Subscriber subscriber = mock(Subscriber.class);
 
         // Act
@@ -32,7 +35,9 @@ public class StreamEntryProcessorTest {
         // Assert
         //
         verify(subscriber, never()).onNext(null);
+        verify(subscriber, times(1)).onNext(validEntry);
     }
+
 
     @Test
     public void If_An_Entry_Has_A_Null_EventNumber_Then_It_Should_Not_Be_Sent_To_Subscriber() {
@@ -45,13 +50,14 @@ public class StreamEntryProcessorTest {
 
         Entry entryOne = new Entry();
         entryOne.setEventNumber(null);
-        entryOne.setEventType(null);
         entries.add(entryOne);
 
         Entry entryTwo = new Entry();
         entryTwo.setEventNumber(null);
-        entryTwo.setEventType(null);
         entries.add(entryTwo);
+
+        Entry validEntry = constructValidEntry(1);
+        entries.add(validEntry);
 
         Subscriber subscriber = mock(Subscriber.class);
 
@@ -63,6 +69,8 @@ public class StreamEntryProcessorTest {
         //
         verify(subscriber, never()).onNext(entryOne);
         verify(subscriber, never()).onNext(entryTwo);
+        verify(subscriber, times(1)).onNext(validEntry);
+
     }
 
     @Test
@@ -74,10 +82,16 @@ public class StreamEntryProcessorTest {
 
         List<Entry> entries = new ArrayList<>();
 
-        Entry entry = new Entry();
-        entry.setEventNumber(10);
-        entry.setEventType(null);
-        entries.add(entry);
+        Entry entryOne = new Entry();
+        entryOne.setEventType(null);
+        entries.add(entryOne);
+
+        Entry entryTwo = new Entry();
+        entryTwo.setEventType(null);
+        entries.add(entryTwo);
+
+        Entry validEntry = constructValidEntry(1);
+        entries.add(validEntry);
 
         Subscriber subscriber = mock(Subscriber.class);
 
@@ -87,7 +101,10 @@ public class StreamEntryProcessorTest {
 
         // Assert
         //
-        verify(subscriber, never()).onNext(entry);
+        verify(subscriber, never()).onNext(entryOne);
+        verify(subscriber, never()).onNext(entryTwo);
+        verify(subscriber, times(1)).onNext(validEntry);
+
     }
 
     @Test
@@ -100,9 +117,11 @@ public class StreamEntryProcessorTest {
         List<Entry> entries = new ArrayList<>();
 
         Entry entry = new Entry();
-        entry.setEventNumber(10);
         entry.setEventType("$metadata");
         entries.add(entry);
+
+        Entry validEntry = constructValidEntry(1);
+        entries.add(validEntry);
 
         Subscriber subscriber = mock(Subscriber.class);
 
@@ -113,6 +132,8 @@ public class StreamEntryProcessorTest {
         // Assert
         //
         verify(subscriber, never()).onNext(entry);
+        verify(subscriber, times(1)).onNext(validEntry);
+
     }
 
     @Test
@@ -124,10 +145,8 @@ public class StreamEntryProcessorTest {
 
         List<Entry> entries = new ArrayList<>();
 
-        Entry entry = new Entry();
-        entry.setEventNumber(10);
-        entry.setEventType("validtype");
-        entries.add(entry);
+        Entry validEntry = constructValidEntry(1);
+        entries.add(validEntry);
 
         Subscriber subscriber = mock(Subscriber.class);
 
@@ -137,7 +156,7 @@ public class StreamEntryProcessorTest {
 
         // Assert
         //
-        verify(subscriber, times(1)).onNext(entry);
+        verify(subscriber, times(1)).onNext(validEntry);
     }
 
     @Test
@@ -149,10 +168,10 @@ public class StreamEntryProcessorTest {
 
         List<Entry> entries = new ArrayList<>();
 
-        Entry entry = new Entry();
-        entry.setEventNumber(10);
-        entry.setEventType("validtype");
-        entries.add(entry);
+        Entry entryOne = constructValidEntry(0);
+        entries.add(entryOne);
+        Entry entryTwo = constructValidEntry(1);
+        entries.add(entryTwo);
 
         Entry invalidEntry = new Entry();
         invalidEntry.setEventNumber(10);
@@ -167,7 +186,8 @@ public class StreamEntryProcessorTest {
 
         // Assert
         //
-        verify(subscriber, times(1)).onNext(entry);
+        verify(subscriber, times(1)).onNext(entryOne);
+        verify(subscriber, times(1)).onNext(entryTwo);
         verify(subscriber, times(0)).onNext(invalidEntry);
     }
 
@@ -184,17 +204,9 @@ public class StreamEntryProcessorTest {
 
         List<Entry> entries = new ArrayList<>();
 
-        Entry entryOne = new Entry();
-        entryOne.setEventNumber(0);
-        entryOne.setEventType("validtype");
-
-        Entry entryTwo = new Entry();
-        entryTwo.setEventNumber(1);
-        entryTwo.setEventType("validtype");
-
-        Entry entryThree = new Entry();
-        entryThree.setEventNumber(2);
-        entryThree.setEventType("validtype");
+        Entry entryOne = constructValidEntry(0);
+        Entry entryTwo = constructValidEntry(1);
+        Entry entryThree = constructValidEntry(2);
 
         // Add the entries in reverse order
         entries.add(entryThree);
@@ -214,5 +226,12 @@ public class StreamEntryProcessorTest {
         inOrder.verify(subscriber).onNext(entryOne);
         inOrder.verify(subscriber).onNext(entryTwo);
         inOrder.verify(subscriber).onNext(entryThree);
+    }
+
+    private Entry constructValidEntry(int eventNumber) {
+        Entry entry = new Entry();
+        entry.setEventType("sometype");
+        entry.setEventNumber(eventNumber);
+        return entry;
     }
 }
