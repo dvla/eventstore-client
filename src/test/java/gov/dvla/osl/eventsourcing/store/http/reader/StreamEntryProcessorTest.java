@@ -208,7 +208,13 @@ public class StreamEntryProcessorTest {
         Entry entryTwo = constructValidEntry(1);
         Entry entryThree = constructValidEntry(2);
 
+        Entry invalidEntry = new Entry();
+        invalidEntry.setEventNumber(3);
+        invalidEntry.setEventType(null);
+        entries.add(invalidEntry);
+
         // Add the entries in reverse order
+        entries.add(invalidEntry);
         entries.add(entryThree);
         entries.add(entryTwo);
         entries.add(entryOne);
@@ -223,9 +229,10 @@ public class StreamEntryProcessorTest {
 
         // Assert
         //
-        inOrder.verify(subscriber).onNext(entryOne);
-        inOrder.verify(subscriber).onNext(entryTwo);
-        inOrder.verify(subscriber).onNext(entryThree);
+        inOrder.verify(subscriber, times(1)).onNext(entryOne);
+        inOrder.verify(subscriber, times(1)).onNext(entryTwo);
+        inOrder.verify(subscriber, times(1)).onNext(entryThree);
+        inOrder.verify(subscriber, times(0)).onNext(invalidEntry);
     }
 
     private Entry constructValidEntry(int eventNumber) {
