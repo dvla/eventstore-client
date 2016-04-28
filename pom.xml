@@ -4,7 +4,7 @@
     <parent>
         <groupId>uk.gov.dvla.dsp</groupId>
         <artifactId>dsp-parent</artifactId>
-        <version>4.1</version>
+        <version>4.2</version>
     </parent>
 
     <groupId>uk.gov.dvla.osl</groupId>
