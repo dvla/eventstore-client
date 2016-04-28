@@ -4,7 +4,6 @@ import gov.dvla.osl.eventsourcing.api.DataFetcher;
 import gov.dvla.osl.eventsourcing.exception.EventStoreClientTechnicalException;
 import gov.dvla.osl.eventsourcing.store.http.EventStoreService;
 import gov.dvla.osl.eventsourcing.store.http.entity.EventStreamData;
-import gov.dvla.osl.eventsourcing.store.http.reader.HttpEventStoreReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import retrofit2.Call;
@@ -34,7 +33,7 @@ public class StreamDataFetcher implements DataFetcher {
 
         final Response<EventStreamData> response = eventStream.execute();
 
-        if (response.isSuccess())
+        if (response.isSuccessful())
             return response.body();
         else
             throw new EventStoreClientTechnicalException(String.format("GET failed on %s with status %d", url, response.code()));
