@@ -25,7 +25,7 @@ public class StreamDataFetcher implements DataFetcher {
     }
 
     @Override
-    public EventStreamData getStreamData(final String url, final boolean longPoll) throws IOException {
+    public EventStreamData fetchStreamData(final String url, final boolean longPoll) throws IOException {
 
         if (longPoll)
             LOGGER.info("Starting long-poll with value of " + longPollSeconds);

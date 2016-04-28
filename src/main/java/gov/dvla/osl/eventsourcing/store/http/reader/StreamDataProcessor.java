@@ -6,9 +6,13 @@ import gov.dvla.osl.eventsourcing.api.EntryProcessor;
 import gov.dvla.osl.eventsourcing.api.LinkProcessor;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
 import gov.dvla.osl.eventsourcing.store.http.entity.EventStreamData;
+import gov.dvla.osl.eventsourcing.store.http.entity.Link;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Subscriber;
+
+import java.io.IOException;
+import java.util.List;
 
 public class StreamDataProcessor implements DataProcessor {
 
@@ -21,7 +25,7 @@ public class StreamDataProcessor implements DataProcessor {
     private final LinkProcessor linkProcessor;
     private final DataFetcher dataFetcher;
     private final EventStoreConfiguration configuration;
-    private boolean keepGoing;
+    private boolean keepGoing = true;
 
     public StreamDataProcessor(final EntryProcessor entryProcessor,
                                final LinkProcessor linkProcessor,
@@ -37,36 +41,38 @@ public class StreamDataProcessor implements DataProcessor {
     public void processData(final Subscriber subscriber,
                             final String streamName,
                             final boolean keepAlive,
-                            int nextVersionNumber) throws Exception {
+                            final int nextVersionNumber) throws IOException {
 
         final String headUrl = String.format(HEAD_URL, streamName, nextVersionNumber, configuration.getProjectionConfiguration().getPageSize());
 
-        EventStreamData eventStreamData = dataFetcher.getStreamData(headUrl, DONT_LONGPOLL);
-        entryProcessor.provideEntriesToSubscriber(eventStreamData.getEntries(), subscriber);
+        List<Link> links = getAndProcessEntries(subscriber, headUrl, DONT_LONGPOLL);
 
         String lastLinkProcessed = headUrl;
         String previous;
 
         do {
-            while (linkProcessor.getUriByRelation(eventStreamData.getLinks(), "previous").equals("")) {
-
+            while (linkProcessor.getUriByRelation(links, "previous").equals("")) {
                 if (keepAlive) {
-                    eventStreamData = dataFetcher.getStreamData(lastLinkProcessed, DO_LONGPOLL);
-                    entryProcessor.provideEntriesToSubscriber(eventStreamData.getEntries(), subscriber);
+                    links = getAndProcessEntries(subscriber, lastLinkProcessed, DO_LONGPOLL);
                 } else {
                     subscriber.onCompleted();
                     return;
                 }
             }
 
-            previous = linkProcessor.getUriByRelation(eventStreamData.getLinks(), "previous");
+            previous = linkProcessor.getUriByRelation(links, "previous");
 
-            eventStreamData = dataFetcher.getStreamData(previous, DONT_LONGPOLL);
-            entryProcessor.provideEntriesToSubscriber(eventStreamData.getEntries(), subscriber);
+            links = getAndProcessEntries(subscriber, previous, DONT_LONGPOLL);
 
             lastLinkProcessed = previous;
 
         } while (this.keepGoing);
+    }
+
+    private List<Link> getAndProcessEntries(final Subscriber subscriber, final String headUrl, final boolean longPoll) throws IOException {
+        EventStreamData eventStreamData = dataFetcher.fetchStreamData(headUrl, longPoll);
+        entryProcessor.provideEntriesToSubscriber(eventStreamData.getEntries(), subscriber);
+        return eventStreamData.getLinks();
     }
 
     @Override
