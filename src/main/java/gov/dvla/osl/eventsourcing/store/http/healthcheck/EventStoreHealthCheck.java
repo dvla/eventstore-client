@@ -37,7 +37,7 @@ public class EventStoreHealthCheck {
 
         try {
             final Response<HealthCheck> response = ping.execute();
-             return response.isSuccess();
+             return response.isSuccessful();
         } catch (IOException e) {
             return false;
         }

@@ -1,28 +1,24 @@
 package gov.dvla.osl.eventsourcing.store.http.writer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import gov.dvla.osl.eventsourcing.api.Event;
 import gov.dvla.osl.eventsourcing.api.EventStoreWriter;
 import gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
 import gov.dvla.osl.eventsourcing.exception.EventStoreClientTechnicalException;
+import gov.dvla.osl.eventsourcing.store.http.EventStoreService;
+import gov.dvla.osl.eventsourcing.store.http.ServiceGenerator;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import retrofit2.Call;
+import retrofit2.Response;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import gov.dvla.osl.eventsourcing.store.http.EventStoreService;
-import gov.dvla.osl.eventsourcing.store.http.ServiceGenerator;
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import retrofit2.Call;
-import retrofit2.Response;
 
 public class HttpEventStoreWriter implements EventStoreWriter {
 
@@ -60,7 +56,7 @@ public class HttpEventStoreWriter implements EventStoreWriter {
 
             final Response<Void> response = call.execute();
 
-            if (!response.isSuccess()) {
+            if (!response.isSuccessful()) {
                 LOGGER.error(WRITING_EVENT_ERROR);
                 throw new EventStoreClientTechnicalException(WRITING_EVENT_ERROR);
             }
