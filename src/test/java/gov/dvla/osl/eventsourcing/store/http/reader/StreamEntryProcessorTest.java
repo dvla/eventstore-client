@@ -9,7 +9,12 @@ import java.util.List;
 import org.mockito.InOrder;
 import rx.Subscriber;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 
 public class StreamEntryProcessorTest {
 
