@@ -55,7 +55,7 @@ public class ProjectionProcessor {
 
         categoryStream.readStreamEventsForward(getNextVersionNumber).retryWhen(errors -> {
             return errors.flatMap(error -> {
-                LOGGER.error("An error occurred processing the stream", error.getSuppressed()[0]);
+                LOGGER.error("An error occurred processing the stream", error.getMessage());
                 return Observable.timer(configuration.getProjectionConfiguration().getSecondsBeforeRetry(), TimeUnit.SECONDS);
             });
         }).subscribe(
