@@ -47,7 +47,7 @@ public class DefaultEventDeserialiserTest {
         //
         Date eventDate = new Date();
         UUID eventId = UUID.randomUUID();
-        SomeEvent testEvent = new SomeEvent(eventId, "billy", "brag", "emailaddress", eventDate);
+        SomeEvent testEvent = new SomeEvent(eventId, "adebayo", "akinfenwa", "emailaddress", eventDate);
 
         ObjectMapper mapper = new ObjectMapper();
         String data = mapper.writeValueAsString(testEvent);
@@ -61,8 +61,8 @@ public class DefaultEventDeserialiserTest {
         // Assert
         //
         Assert.assertEquals(eventId, someEvent.driverId);
-        Assert.assertEquals("billy", someEvent.forename);
-        Assert.assertEquals("brag", someEvent.surname);
+        Assert.assertEquals("adebayo", someEvent.forename);
+        Assert.assertEquals("akinfenwa", someEvent.surname);
         Assert.assertEquals("emailaddress", someEvent.email);
         Assert.assertEquals(eventDate.toString(), someEvent.eventDate.toString());
     }
