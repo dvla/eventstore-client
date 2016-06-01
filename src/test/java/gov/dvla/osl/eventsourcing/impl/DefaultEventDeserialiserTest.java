@@ -1,5 +1,6 @@
 package gov.dvla.osl.eventsourcing.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.dvla.osl.eventsourcing.api.Event;
 import gov.dvla.osl.eventsourcing.api.EventDeserialiser;
 import gov.dvla.osl.eventsourcing.exception.EventDeserialisationException;
@@ -8,6 +9,7 @@ import org.junit.Test;
 import gov.dvla.osl.eventsourcing.store.memory.SomeEvent;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.UUID;
 
 public class DefaultEventDeserialiserTest {
@@ -43,19 +45,25 @@ public class DefaultEventDeserialiserTest {
 
         // Arrange
         //
-        String data = "{\n  \"driverId\": \"fbf4a1a1-b4a3-4dfe-a01f-ec52c34e16e4\", \"forename\": \"billy\", \"surname\": \"brag\", \"email\": \"emailaddress\" \n}";
-        EventDeserialiser eventDeserialiser = new DefaultEventDeserialiser();
+        Date eventDate = new Date();
+        UUID eventId = UUID.randomUUID();
+        SomeEvent testEvent = new SomeEvent(eventId, "billy", "brag", "emailaddress", eventDate);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String data = mapper.writeValueAsString(testEvent);
 
         // Act
         //
+        EventDeserialiser eventDeserialiser = new DefaultEventDeserialiser();
         Event event = eventDeserialiser.deserialise(data, "gov.dvla.osl.eventsourcing.store.memory.SomeEvent");
         SomeEvent someEvent = (SomeEvent)event;
 
         // Assert
         //
-        Assert.assertEquals(UUID.fromString("fbf4a1a1-b4a3-4dfe-a01f-ec52c34e16e4"), someEvent.driverId);
+        Assert.assertEquals(eventId, someEvent.driverId);
         Assert.assertEquals("billy", someEvent.forename);
         Assert.assertEquals("brag", someEvent.surname);
         Assert.assertEquals("emailaddress", someEvent.email);
+        Assert.assertEquals(eventDate.toString(), someEvent.eventDate.toString());
     }
 }
