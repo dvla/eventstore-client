@@ -3,6 +3,7 @@ package uk.gov.dvla.osl.eventsourcing.impl;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.xebia.jacksonlombok.JacksonLombokAnnotationIntrospector;
 import uk.gov.dvla.osl.eventsourcing.api.Event;
 import uk.gov.dvla.osl.eventsourcing.api.EventDeserialiser;
 import uk.gov.dvla.osl.eventsourcing.exception.EventDeserialisationException;
@@ -13,6 +14,7 @@ public class DefaultEventDeserialiser implements EventDeserialiser {
 
     public DefaultEventDeserialiser() {
         mapper = new ObjectMapper();
+        mapper.setAnnotationIntrospector(new JacksonLombokAnnotationIntrospector());
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
     }
