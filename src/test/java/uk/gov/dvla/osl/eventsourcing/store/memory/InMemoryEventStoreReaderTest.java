@@ -18,7 +18,7 @@ public class InMemoryEventStoreReaderTest {
         InMemoryEventStore es = new InMemoryEventStore();
         es.store(driverId.toString(), 0, Arrays.asList(
                 new SomeEvent(driverId, "forename", "surname", "email", new Date())));
-        Thread.sleep(1);
+        Thread.sleep(50);
         es.store(driverId.toString(), 1, Arrays.asList(
                 new SomeEvent(driverId, "forename", "surname", "email", new Date())));
         EventStream stream = es.loadEventsAfter(0L);
