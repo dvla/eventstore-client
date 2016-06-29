@@ -1,4 +1,4 @@
-package uk.gov.dvla.osl.eventsourcing.store.memory;
+package uk.gov.dvla.osl.eventsourcing.impl;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import uk.gov.dvla.osl.eventsourcing.api.Event;
