@@ -6,7 +6,6 @@ import uk.gov.dvla.osl.eventsourcing.api.EventDeserialiser;
 import uk.gov.dvla.osl.eventsourcing.exception.EventDeserialisationException;
 import org.junit.Assert;
 import org.junit.Test;
-import uk.gov.dvla.osl.eventsourcing.store.memory.SomeEvent;
 
 import java.io.IOException;
 import java.util.Date;
@@ -24,7 +23,7 @@ public class DefaultEventDeserialiserTest {
 
         // Act
         //
-        eventDeserialiser.deserialise(data, "uk.gov.dvla.osl.eventsourcing.store.memory.SomeEvent");
+        eventDeserialiser.deserialise(data, SomeEvent.class.getName());
     }
 
     @Test(expected = EventDeserialisationException.class)
@@ -55,7 +54,7 @@ public class DefaultEventDeserialiserTest {
         // Act
         //
         EventDeserialiser eventDeserialiser = new DefaultEventDeserialiser();
-        Event event = eventDeserialiser.deserialise(data, "uk.gov.dvla.osl.eventsourcing.store.memory.SomeEvent");
+        Event event = eventDeserialiser.deserialise(data, SomeEvent.class.getName());
         SomeEvent someEvent = (SomeEvent)event;
 
         // Assert

@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import uk.gov.dvla.osl.eventsourcing.api.Event;
 import uk.gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
-import uk.gov.dvla.osl.eventsourcing.store.memory.SomeEvent;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.dvla.osl.eventsourcing.impl.SomeEvent;
 
 import java.io.IOException;
 import java.util.ArrayList;
