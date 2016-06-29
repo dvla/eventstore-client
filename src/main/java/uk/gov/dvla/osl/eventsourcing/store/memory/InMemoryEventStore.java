@@ -10,6 +10,7 @@ import rx.functions.Func0;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Deprecated
 public class InMemoryEventStore implements EventStore<Long> {
     final Map<String, ListEventStream> streams = new ConcurrentHashMap<>();
     final TreeSet<Transaction> transactions = new TreeSet<Transaction>();
