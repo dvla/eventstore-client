@@ -72,7 +72,7 @@ public class HttpEventStoreReader implements EventStoreReader<Long> {
             }
         }).retryWhen(errors -> {
             return errors.flatMap(error -> {
-                LOGGER.error("An error occurred processing the stream", error.getMessage());
+                LOGGER.error("An error occurred processing the stream {}", error.getMessage());
                 return Observable.timer(configuration.getProjectionConfiguration().getSecondsBeforeRetry(), TimeUnit.SECONDS);
             });
         }).subscribe(
