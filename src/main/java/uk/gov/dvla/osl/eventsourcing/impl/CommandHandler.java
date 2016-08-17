@@ -39,7 +39,11 @@ public class CommandHandler {
     }
 
     public void handle(final Command command) throws Exception {
-        final EventStream eventStream = eventStoreReader.loadEventStream(this.streamPrefix + "-" + command.aggregateId().toString());
+        handle(command, String.format("%s-%s", this.streamPrefix, command.aggregateId().toString()));
+    }
+
+    public void handle(final Command command, final String streamPrefix) throws Exception {
+        final EventStream eventStream = eventStoreReader.loadEventStream(streamPrefix);
         final Object target = newAggregateInstance(command);
         for (Event event : eventStream) {
             LOGGER.debug("Applying event: " + event.getClass() + " " + mapper.writeValueAsString(event));
@@ -49,7 +53,7 @@ public class CommandHandler {
         ReflectionUtil.invokeHandleMethod(target, command);
         final List<Event> events = ((Aggregate) target).getUncommittedEvents();
         if (events != null && events.size() > 0) {
-            eventStoreWriter.store(streamPrefix + "-" + command.aggregateId(), eventStream.version(), events);
+            eventStoreWriter.store(streamPrefix, eventStream.version(), events);
         } else {
             LOGGER.debug("No events raised by aggregate");
         }
