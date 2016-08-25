@@ -14,8 +14,8 @@ import java.io.IOException;
 public class StreamDataFetcher implements DataFetcher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpEventStoreReader.class);
-    final private EventStoreService service;
-    final private String longPollSeconds;
+    private final EventStoreService service;
+    private final String longPollSeconds;
 
     public StreamDataFetcher(final EventStoreService service,
                              final String longPollSeconds) {
@@ -27,7 +27,7 @@ public class StreamDataFetcher implements DataFetcher {
     public EventStreamData fetchStreamData(final String url, final boolean longPoll) throws IOException {
 
         if (longPoll)
-            LOGGER.info("Starting long-poll with value of " + longPollSeconds);
+            LOGGER.debug("Starting long-poll with value of " + longPollSeconds);
 
         final Call<EventStreamData> eventStream = service.getEventStreamData(longPoll ? longPollSeconds : null, url + "?embed=body");
 

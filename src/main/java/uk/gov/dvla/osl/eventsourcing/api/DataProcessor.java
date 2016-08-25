@@ -6,6 +6,8 @@ public interface DataProcessor {
     void processData(final Subscriber subscriber,
                      final String streamName,
                      final boolean keepAlive,
-                     final int nextVersionNumber) throws Exception;
+                     final int start,
+                     final int pageSize,
+                     final ReadDirection readDirection) throws Exception;
     void shutDown();
 }
