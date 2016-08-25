@@ -1,11 +1,12 @@
 package uk.gov.dvla.osl.eventsourcing.store.memory;
 
 import uk.gov.dvla.osl.eventsourcing.api.Event;
+import uk.gov.dvla.osl.eventsourcing.api.EventDeserialiser;
 import uk.gov.dvla.osl.eventsourcing.api.EventStore;
 import uk.gov.dvla.osl.eventsourcing.api.EventStream;
+import uk.gov.dvla.osl.eventsourcing.impl.DefaultEventDeserialiser;
 import uk.gov.dvla.osl.eventsourcing.store.http.entity.Entry;
 import rx.Observable;
-import rx.functions.Func0;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,15 +15,21 @@ import java.util.concurrent.ConcurrentHashMap;
 public class InMemoryEventStore implements EventStore<Long> {
     final Map<String, ListEventStream> streams = new ConcurrentHashMap<>();
     final TreeSet<Transaction> transactions = new TreeSet<Transaction>();
+    final EventDeserialiser eventDeserialiser = new DefaultEventDeserialiser();
 
     @Override
-    public ListEventStream loadEventStream(final String aggregateId) {
-        ListEventStream eventStream = streams.get(aggregateId);
+    public ListEventStream loadEventStream(final String streamName) {
+        ListEventStream eventStream = streams.get(streamName);
         if (eventStream == null) {
             eventStream = new ListEventStream();
-            streams.put(aggregateId, eventStream);
+            streams.put(streamName, eventStream);
         }
         return eventStream;
+    }
+
+    @Override
+    public EventStream loadEventStream(String streamName, int start) {
+        return loadEventStream(streamName);
     }
 
     public EventStream loadEventsAfter(final Long timestamp) {
@@ -40,7 +47,24 @@ public class InMemoryEventStore implements EventStore<Long> {
     }
 
     @Override
-    public Observable<Entry> readStreamEventsForward(Func0<Integer> getNextVersionNumber) {
+    public Observable<Entry> readStreamEventsForward(final String streamName,
+                                                     final int start,
+                                                     final int count,
+                                                     final boolean keepAlive) {
+       return null;
+    }
+
+    @Override
+    public Observable<Entry> readStreamEventsBackward(final String streamName,
+                                                      final int start,
+                                                      final int count,
+                                                      final boolean keepAlive) {
+        return null;
+    }
+
+    @Override
+    public Observable<Entry> readLastEvent(String streamName) {
+
         return null;
     }
 

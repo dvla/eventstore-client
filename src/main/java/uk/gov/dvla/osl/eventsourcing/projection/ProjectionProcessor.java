@@ -49,11 +49,16 @@ public class ProjectionProcessor {
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
-    public void projectEvents(Func0<Integer> getNextVersionNumber) throws IOException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public void projectEvents(Func0<Integer> getNextVersionNumber) throws IOException,
+            InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
 
         categoryStream = new HttpEventStoreReader(configuration);
 
-        categoryStream.readStreamEventsForward(getNextVersionNumber).retryWhen(errors -> {
+        categoryStream.readStreamEventsForward(
+                configuration.getProjectionConfiguration().getStream(),
+                getNextVersionNumber.call(),
+                configuration.getProjectionConfiguration().getPageSize(),
+                configuration.getProjectionConfiguration().isKeepAlive()).retryWhen(errors -> {
             return errors.flatMap(error -> {
                 LOGGER.error("An error occurred processing the stream {}", error.getMessage());
                 return Observable.timer(configuration.getProjectionConfiguration().getSecondsBeforeRetry(), TimeUnit.SECONDS);

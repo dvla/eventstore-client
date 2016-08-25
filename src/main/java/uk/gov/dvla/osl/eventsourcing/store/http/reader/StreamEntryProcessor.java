@@ -1,6 +1,7 @@
 package uk.gov.dvla.osl.eventsourcing.store.http.reader;
 
 import uk.gov.dvla.osl.eventsourcing.api.EntryProcessor;
+import uk.gov.dvla.osl.eventsourcing.api.ReadDirection;
 import uk.gov.dvla.osl.eventsourcing.store.http.entity.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +19,15 @@ public class StreamEntryProcessor implements EntryProcessor {
      */
     private static final String HARD_DELETED_EVENT_TYPE = "$metadata";
 
-    public void provideEntriesToSubscriber(final List<Entry> entries, final Subscriber subscriber) {
+    public void provideEntriesToSubscriber(final List<Entry> entries,
+                                           final Subscriber subscriber,
+                                           final ReadDirection readDirection) {
         entries.stream()
                 .filter(this::validEvent)
-                .sorted((o1, o2) -> o1.getEventNumber() - o2.getEventNumber())
+                .sorted((o1, o2) ->
+                        readDirection == ReadDirection.FORWARD
+                                ? o1.getEventNumber() - o2.getEventNumber()
+                                : o2.getEventNumber() - o1.getEventNumber())
                 .forEach(event -> {
                     LOGGER.debug("Calling subscriber.onNext with event number " + event.getEventNumber());
                     subscriber.onNext(event);
