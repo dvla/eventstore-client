@@ -1,8 +1,5 @@
-package uk.gov.dvla.osl.eventsourcing.store.memory;
+package uk.gov.dvla.osl.eventsourcing.api;
 
-
-import uk.gov.dvla.osl.eventsourcing.api.Event;
-import uk.gov.dvla.osl.eventsourcing.api.EventStream;
 
 import java.util.Collections;
 import java.util.Iterator;

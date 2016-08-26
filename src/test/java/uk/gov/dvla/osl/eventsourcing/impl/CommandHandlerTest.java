@@ -1,12 +1,13 @@
 package uk.gov.dvla.osl.eventsourcing.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import uk.gov.dvla.osl.eventsourcing.api.Command;
 import uk.gov.dvla.osl.eventsourcing.api.Event;
 import uk.gov.dvla.osl.eventsourcing.api.EventStoreReader;
 import uk.gov.dvla.osl.eventsourcing.api.EventStoreWriter;
-import uk.gov.dvla.osl.eventsourcing.store.memory.ListEventStream;
+import uk.gov.dvla.osl.eventsourcing.api.ListEventStream;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -199,5 +200,36 @@ public class CommandHandlerTest {
         // Assert
         //
         verify(commandHandlerLookup).newAggregateInstance(command);
+    }
+
+    @Test
+    public void DeprecatedConstructorDoesNotBreakStuff() throws Exception {
+
+        // Arrange
+        //
+        Command command = new SimpleCommand(aggregateId);
+
+        EventStoreReader eventStoreReader = mock(EventStoreReader.class);
+        when(eventStoreReader.loadEventStream("streamprefix-" + aggregateId.toString())).thenReturn(new ListEventStream(0, new ArrayList<>()));
+
+        EventStoreWriter eventStoreWriter = mock(EventStoreWriter.class);
+        ArgumentCaptor<List> capturedEvents = ArgumentCaptor.forClass(List.class);
+
+        CommandHandler commandHandler = new CommandHandler(eventStoreReader,
+                eventStoreWriter,
+                "streamprefix",
+                new ObjectMapper(),
+                SomeAggregate.class);
+
+        // Act
+        //
+        commandHandler.handle(command);
+
+        // Assert
+        //
+        verify(eventStoreWriter).store(eq("streamprefix-" + aggregateId.toString()), anyLong(), capturedEvents.capture());
+
+        // check that the one event raised by the aggregate was passed to the writer
+        assertThat("Expected 1 event", capturedEvents.getAllValues().size() == 1);
     }
 }
