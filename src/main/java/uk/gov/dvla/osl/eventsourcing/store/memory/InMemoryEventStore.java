@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Deprecated
-public class InMemoryEventStore implements EventStore<Long> {
+public class InMemoryEventStore implements EventStore {
     final Map<String, ListEventStream> streams = new ConcurrentHashMap<>();
     final TreeSet<Transaction> transactions = new TreeSet<Transaction>();
     final EventDeserialiser eventDeserialiser = new DefaultEventDeserialiser();
@@ -30,6 +30,11 @@ public class InMemoryEventStore implements EventStore<Long> {
     @Override
     public EventStream loadEventStream(String streamName, int start) {
         return loadEventStream(streamName);
+    }
+
+    @Override
+    public EventStream loadEventStreamWithLastEvent(String streamName) {
+        return null;
     }
 
     public EventStream loadEventsAfter(final Long timestamp) {
