@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class HttpEventStoreReader implements EventStoreReader<Long> {
+public class HttpEventStoreReader implements EventStoreReader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpEventStoreReader.class);
 
@@ -85,6 +85,26 @@ public class HttpEventStoreReader implements EventStoreReader<Long> {
             LOGGER.debug(String.format("HttpEventStoreReader.loadEventStream(streamName=%s, start=%s).  %d events returned", streamName, start, events.size()));
             return new ListEventStream(lastEventNumber[0], events);
         }
+    }
+
+    @Override
+    public EventStream loadEventStreamWithLastEvent(final String streamName) {
+
+        final long[] lastEventNumber = {0};
+        final List<Event> events = new ArrayList<>();
+
+        readStreamEventsBackward(streamName,
+                StreamPosition.END, 1, false).subscribe(
+                (Entry entry) -> {
+                    lastEventNumber[0] = entry.getEventNumber();
+                    Event event = this.eventDeserialiser.deserialise(entry.getData(), entry.getEventType());
+                    events.add(event);
+                },
+                (error) -> LOGGER.error(error.getMessage(), error),
+                () -> LOGGER.debug("Projection finished")
+        );
+
+        return new ListEventStream(events.size() == 0 ? -1 : lastEventNumber[0], events);
     }
 
     @Override

@@ -18,11 +18,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Deprecated in favour of CommandHandler.  This behaviour has been merged and a new constructor created on
+ * CommandHandler that allows passing in of two functional arguments specifying a method to load existing events as
+ * well as store newly created events.
+ */
+@Deprecated
 public class CodeCommandHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CodeCommandHandler.class);
 
-    private final EventStoreReader<Entry> eventStoreReader;
+    private final EventStoreReader eventStoreReader;
     private final EventStoreWriter eventStoreWriter;
     private final String streamPrefix;
     private final ObjectMapper mapper;

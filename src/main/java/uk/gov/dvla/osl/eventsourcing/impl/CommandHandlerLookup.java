@@ -21,7 +21,7 @@ public class CommandHandlerLookup {
 	public CommandHandlerLookup(String methodName, Class<?>... aggregateTypes) {
 		for (Class<?> type : aggregateTypes) {
 			for (Method method : type.getMethods()) {
-				if (method.getName().equals(methodName) && 
+				if (method.getName().equals(methodName) &&
 						method.getParameterTypes().length == 1 &&
 						Command.class.isAssignableFrom(method.getParameterTypes()[0])) {
 					commandHandlers.put((Class<? extends Command>) method.getParameterTypes()[0], type);
@@ -29,7 +29,7 @@ public class CommandHandlerLookup {
 			}
 		}
 	}
-	
+
 	public Class<?> targetType(Command command) {
 		return commandHandlers.get(command.getClass());
 	}
