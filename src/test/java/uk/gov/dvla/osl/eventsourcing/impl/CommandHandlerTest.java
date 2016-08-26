@@ -7,7 +7,7 @@ import uk.gov.dvla.osl.eventsourcing.api.Command;
 import uk.gov.dvla.osl.eventsourcing.api.Event;
 import uk.gov.dvla.osl.eventsourcing.api.EventStoreReader;
 import uk.gov.dvla.osl.eventsourcing.api.EventStoreWriter;
-import uk.gov.dvla.osl.eventsourcing.store.memory.ListEventStream;
+import uk.gov.dvla.osl.eventsourcing.api.ListEventStream;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -4,6 +4,7 @@ import uk.gov.dvla.osl.eventsourcing.api.Event;
 import uk.gov.dvla.osl.eventsourcing.api.EventDeserialiser;
 import uk.gov.dvla.osl.eventsourcing.api.EventStore;
 import uk.gov.dvla.osl.eventsourcing.api.EventStream;
+import uk.gov.dvla.osl.eventsourcing.api.ListEventStream;
 import uk.gov.dvla.osl.eventsourcing.impl.DefaultEventDeserialiser;
 import uk.gov.dvla.osl.eventsourcing.store.http.entity.Entry;
 import rx.Observable;

@@ -16,7 +16,7 @@ import uk.gov.dvla.osl.eventsourcing.impl.DefaultEventDeserialiser;
 import uk.gov.dvla.osl.eventsourcing.store.http.EventStoreService;
 import uk.gov.dvla.osl.eventsourcing.store.http.ServiceGenerator;
 import uk.gov.dvla.osl.eventsourcing.store.http.entity.Entry;
-import uk.gov.dvla.osl.eventsourcing.store.memory.ListEventStream;
+import uk.gov.dvla.osl.eventsourcing.api.ListEventStream;
 
 import java.io.IOException;
 import java.util.ArrayList;
