@@ -2,7 +2,6 @@ package uk.gov.dvla.osl.eventsourcing.impl;
 
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import sun.jvm.hotspot.utilities.Assert;
 import uk.gov.dvla.osl.eventsourcing.api.Command;
 import uk.gov.dvla.osl.eventsourcing.api.Event;
 import uk.gov.dvla.osl.eventsourcing.api.EventStoreReader;
@@ -20,6 +19,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class CommandHandlerTest {
 
@@ -82,7 +82,7 @@ public class CommandHandlerTest {
         verify(eventStoreWriter).store(eq(expectedStreamName), anyLong(), capturedEvents.capture());
 
         // check that the one event raised by the aggregate was passed to the writer
-        Assert.that(capturedEvents.getAllValues().size() == 1, "Expected 1 event");
+        assertThat("Expected 1 event", capturedEvents.getAllValues().size() == 1);
     }
 
     @Test
@@ -169,7 +169,7 @@ public class CommandHandlerTest {
         verify(eventStoreWriter).store(eq("streamname"), anyLong(), capturedEvents.capture());
 
         // check that the one event raised by the aggregate was passed to the writer
-        Assert.that(capturedEvents.getAllValues().size() == 1, "Expected 1 event");
+        assertThat("Expected 1 event", capturedEvents.getAllValues().size() == 1);
     }
 
     @Test
