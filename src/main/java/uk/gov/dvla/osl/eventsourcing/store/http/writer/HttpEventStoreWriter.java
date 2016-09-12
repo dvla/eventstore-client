@@ -58,7 +58,7 @@ public class HttpEventStoreWriter implements EventStoreWriter {
 
             if (!response.isSuccessful()) {
                 LOGGER.error("{} Response code: {}", WRITING_EVENT_ERROR, response.code());
-                if(response.errorBody()!=null) {
+                if(response.errorBody() != null) {
                     LOGGER.error("Error body is: {}", response.errorBody().string());
                 }
                 throw new EventStoreClientTechnicalException(WRITING_EVENT_ERROR);
