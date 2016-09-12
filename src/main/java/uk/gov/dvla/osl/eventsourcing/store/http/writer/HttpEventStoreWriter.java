@@ -57,15 +57,14 @@ public class HttpEventStoreWriter implements EventStoreWriter {
             final Response<Void> response = call.execute();
 
             if (!response.isSuccessful()) {
-                LOGGER.error("{} Response code: {}", WRITING_EVENT_ERROR, response.code());
+                LOGGER.error("{} Response code: {}. Stream name: {}.", WRITING_EVENT_ERROR, response.code(), streamName);
                 if(response.errorBody() != null) {
                     LOGGER.error("Error body is: {}", response.errorBody().string());
                 }
                 throw new EventStoreClientTechnicalException(WRITING_EVENT_ERROR);
             }
         } catch (IOException e) {
-            LOGGER.error(WRITING_EVENT_ERROR + ": "
-                    + e.getMessage());
+            LOGGER.error("{} Stream name: {}. Error: {}", WRITING_EVENT_ERROR, streamName, e.getMessage());
             throw new RuntimeException(WRITING_EVENT_ERROR);
         }
     }
