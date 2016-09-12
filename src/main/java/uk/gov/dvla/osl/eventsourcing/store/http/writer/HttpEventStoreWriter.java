@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class HttpEventStoreWriter implements EventStoreWriter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpEventStoreWriter.class);
-    private static final String WRITING_EVENT_ERROR = "Error in Writing event to event store";
+    private static final String WRITING_EVENT_ERROR = "Error in Writing event to event store.";
 
     private final EventStoreConfiguration configuration;
     private final ObjectMapper mapper;
@@ -57,7 +57,10 @@ public class HttpEventStoreWriter implements EventStoreWriter {
             final Response<Void> response = call.execute();
 
             if (!response.isSuccessful()) {
-                LOGGER.error(WRITING_EVENT_ERROR);
+                LOGGER.error("{} Response code: {}", WRITING_EVENT_ERROR, response.code());
+                if(response.errorBody() != null) {
+                    LOGGER.error("Error body is: {}", response.errorBody().string());
+                }
                 throw new EventStoreClientTechnicalException(WRITING_EVENT_ERROR);
             }
         } catch (IOException e) {
