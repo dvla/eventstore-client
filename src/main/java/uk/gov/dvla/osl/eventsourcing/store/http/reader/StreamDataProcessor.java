@@ -6,6 +6,7 @@ import uk.gov.dvla.osl.eventsourcing.api.EntryProcessor;
 import uk.gov.dvla.osl.eventsourcing.api.LinkProcessor;
 import uk.gov.dvla.osl.eventsourcing.api.ReadDirection;
 import uk.gov.dvla.osl.eventsourcing.api.StreamPosition;
+import uk.gov.dvla.osl.eventsourcing.api.Take;
 import uk.gov.dvla.osl.eventsourcing.store.http.entity.EventStreamData;
 import uk.gov.dvla.osl.eventsourcing.store.http.entity.Link;
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ public class StreamDataProcessor implements DataProcessor {
                             final boolean keepAlive,
                             final int start,
                             final int pageSize,
+                            final Take take,
                             final ReadDirection readDirection) throws IOException {
 
         final String headUrl = String.format(URL,
@@ -50,9 +52,9 @@ public class StreamDataProcessor implements DataProcessor {
 
         final String linkName = readDirection == ReadDirection.FORWARD ? "previous" : "next";
 
-        List<Link> links = getAndProcessEntries(subscriber, headUrl, DONT_LONGPOLL, readDirection);
+        List<Link> links = getAndProcessEntries(subscriber, headUrl, DONT_LONGPOLL, take, readDirection);
 
-        if (!keepAlive) {
+        if (take == Take.ONE) {
             subscriber.onCompleted();
             return;
         }
@@ -63,7 +65,7 @@ public class StreamDataProcessor implements DataProcessor {
         do {
             while (linkProcessor.getUriByRelation(links, linkName).equals("")) {
                 if (keepAlive) {
-                    links = getAndProcessEntries(subscriber, lastLinkProcessed, DO_LONGPOLL, readDirection);
+                    links = getAndProcessEntries(subscriber, lastLinkProcessed, DO_LONGPOLL, take, readDirection);
                 } else {
                     subscriber.onCompleted();
                     return;
@@ -72,7 +74,7 @@ public class StreamDataProcessor implements DataProcessor {
 
             linkUri = linkProcessor.getUriByRelation(links, linkName);
 
-            links = getAndProcessEntries(subscriber, linkUri, DONT_LONGPOLL, readDirection);
+            links = getAndProcessEntries(subscriber, linkUri, DONT_LONGPOLL, take, readDirection);
 
             lastLinkProcessed = linkUri;
 
@@ -82,10 +84,11 @@ public class StreamDataProcessor implements DataProcessor {
     private List<Link> getAndProcessEntries(final Subscriber subscriber,
                                             final String headUrl,
                                             final boolean longPoll,
+                                            final Take take,
                                             final ReadDirection readDirection) throws IOException {
         LOGGER.debug("StreamDataProcessor.getAndProcessEntries: headUrl=" + headUrl);
         EventStreamData eventStreamData = dataFetcher.fetchStreamData(headUrl, longPoll);
-        entryProcessor.provideEntriesToSubscriber(eventStreamData.getEntries(), subscriber, readDirection);
+        entryProcessor.provideEntriesToSubscriber(eventStreamData.getEntries(), subscriber, take, readDirection);
         return eventStreamData.getLinks();
     }
 

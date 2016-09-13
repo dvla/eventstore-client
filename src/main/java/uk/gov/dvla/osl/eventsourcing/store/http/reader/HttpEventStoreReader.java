@@ -10,6 +10,7 @@ import uk.gov.dvla.osl.eventsourcing.api.EventStoreReader;
 import uk.gov.dvla.osl.eventsourcing.api.EventStream;
 import uk.gov.dvla.osl.eventsourcing.api.ReadDirection;
 import uk.gov.dvla.osl.eventsourcing.api.StreamPosition;
+import uk.gov.dvla.osl.eventsourcing.api.Take;
 import uk.gov.dvla.osl.eventsourcing.configuration.EventStoreConfiguration;
 import uk.gov.dvla.osl.eventsourcing.exception.EventStoreClientTechnicalException;
 import uk.gov.dvla.osl.eventsourcing.impl.DefaultEventDeserialiser;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class HttpEventStoreReader implements EventStoreReader {
 
@@ -92,6 +94,7 @@ public class HttpEventStoreReader implements EventStoreReader {
 
         final long[] lastEventNumber = {0};
         final List<Event> events = new ArrayList<>();
+        final List<Entry> entries = new ArrayList<>();
 
         readStreamEventsBackward(streamName,
                 StreamPosition.END, 1, false).subscribe(
@@ -99,12 +102,15 @@ public class HttpEventStoreReader implements EventStoreReader {
                     lastEventNumber[0] = entry.getEventNumber();
                     Event event = this.eventDeserialiser.deserialise(entry.getData(), entry.getEventType());
                     events.add(event);
+                    entries.add(entry);
                 },
                 (error) -> LOGGER.error(error.getMessage(), error),
                 () -> LOGGER.debug("Projection finished")
         );
 
-        return new ListEventStream(events.size() == 0 ? -1 : lastEventNumber[0], events);
+        final List<Event> eventsToReturn = events.stream().limit(1).collect(Collectors.toList());
+
+        return new ListEventStream(eventsToReturn.size() == 0 ? -1 : entries.stream().findFirst().get().getPositionEventNumber(), eventsToReturn);
     }
 
     @Override
@@ -119,6 +125,7 @@ public class HttpEventStoreReader implements EventStoreReader {
                         keepAlive,
                         start,
                         count,
+                        Take.ALL,
                         ReadDirection.FORWARD);
             } catch (EventStoreClientTechnicalException e) {
                 if (e.getMessage().contains("404"))
@@ -141,6 +148,7 @@ public class HttpEventStoreReader implements EventStoreReader {
                         keepAlive,
                         start,
                         count,
+                        Take.ALL,
                         ReadDirection.BACKWARD);
             } catch (Exception e) {
                 subscriber.onError(e);
@@ -157,6 +165,7 @@ public class HttpEventStoreReader implements EventStoreReader {
                         false,
                         StreamPosition.END,
                         1,
+                        Take.ONE,
                         ReadDirection.BACKWARD);
             } catch (Exception e) {
                 subscriber.onError(e);

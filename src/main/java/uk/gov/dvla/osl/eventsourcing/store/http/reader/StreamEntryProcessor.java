@@ -2,12 +2,14 @@ package uk.gov.dvla.osl.eventsourcing.store.http.reader;
 
 import uk.gov.dvla.osl.eventsourcing.api.EntryProcessor;
 import uk.gov.dvla.osl.eventsourcing.api.ReadDirection;
+import uk.gov.dvla.osl.eventsourcing.api.Take;
 import uk.gov.dvla.osl.eventsourcing.store.http.entity.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Subscriber;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public class StreamEntryProcessor implements EntryProcessor {
 
@@ -21,17 +23,28 @@ public class StreamEntryProcessor implements EntryProcessor {
 
     public void provideEntriesToSubscriber(final List<Entry> entries,
                                            final Subscriber subscriber,
+                                           final Take take,
                                            final ReadDirection readDirection) {
-        entries.stream()
+        Stream<Entry> entriesToProcess = entries.stream()
                 .filter(this::validEvent)
                 .sorted((o1, o2) ->
                         readDirection == ReadDirection.FORWARD
                                 ? o1.getEventNumber() - o2.getEventNumber()
-                                : o2.getEventNumber() - o1.getEventNumber())
-                .forEach(event -> {
-                    LOGGER.debug("Calling subscriber.onNext with event number " + event.getEventNumber());
-                    subscriber.onNext(event);
-                });
+                                : o2.getEventNumber() - o1.getEventNumber());
+
+        if (take == Take.ONE)
+            entriesToProcess
+                    .limit(1)
+                    .forEach(event -> {
+                        LOGGER.debug("Calling subscriber.onNext with event number " + event.getEventNumber());
+                        subscriber.onNext(event);
+                    });
+        else
+            entriesToProcess
+                    .forEach(event -> {
+                        LOGGER.debug("Calling subscriber.onNext with event number " + event.getEventNumber());
+                        subscriber.onNext(event);
+                    });
     }
 
     private boolean validEvent(final Entry entry) {
