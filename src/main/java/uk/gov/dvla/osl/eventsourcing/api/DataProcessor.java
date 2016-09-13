@@ -8,6 +8,7 @@ public interface DataProcessor {
                      final boolean keepAlive,
                      final int start,
                      final int pageSize,
+                     final Take take,
                      final ReadDirection readDirection) throws Exception;
     void shutDown();
 }

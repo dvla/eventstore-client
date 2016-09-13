@@ -1,6 +1,7 @@
 package uk.gov.dvla.osl.eventsourcing.store.http.reader;
 
 import uk.gov.dvla.osl.eventsourcing.api.ReadDirection;
+import uk.gov.dvla.osl.eventsourcing.api.Take;
 import uk.gov.dvla.osl.eventsourcing.store.http.entity.Entry;
 import org.junit.Test;
 
@@ -36,7 +37,7 @@ public class StreamEntryProcessorTest {
 
         // Act
         //
-        streamEntryProcessor.provideEntriesToSubscriber(entries, subscriber, ReadDirection.FORWARD);
+        streamEntryProcessor.provideEntriesToSubscriber(entries, subscriber, Take.ALL, ReadDirection.FORWARD);
 
         // Assert
         //
@@ -69,7 +70,7 @@ public class StreamEntryProcessorTest {
 
         // Act
         //
-        streamEntryProcessor.provideEntriesToSubscriber(entries, subscriber, ReadDirection.FORWARD);
+        streamEntryProcessor.provideEntriesToSubscriber(entries, subscriber, Take.ALL, ReadDirection.FORWARD);
 
         // Assert
         //
@@ -103,7 +104,7 @@ public class StreamEntryProcessorTest {
 
         // Act
         //
-        streamEntryProcessor.provideEntriesToSubscriber(entries, subscriber, ReadDirection.FORWARD);
+        streamEntryProcessor.provideEntriesToSubscriber(entries, subscriber, Take.ALL, ReadDirection.FORWARD);
 
         // Assert
         //
@@ -133,7 +134,7 @@ public class StreamEntryProcessorTest {
 
         // Act
         //
-        streamEntryProcessor.provideEntriesToSubscriber(entries, subscriber, ReadDirection.FORWARD);
+        streamEntryProcessor.provideEntriesToSubscriber(entries, subscriber, Take.ALL, ReadDirection.FORWARD);
 
         // Assert
         //
@@ -158,7 +159,7 @@ public class StreamEntryProcessorTest {
 
         // Act
         //
-        streamEntryProcessor.provideEntriesToSubscriber(entries, subscriber, ReadDirection.FORWARD);
+        streamEntryProcessor.provideEntriesToSubscriber(entries, subscriber, Take.ALL, ReadDirection.FORWARD);
 
         // Assert
         //
@@ -188,7 +189,7 @@ public class StreamEntryProcessorTest {
 
         // Act
         //
-        streamEntryProcessor.provideEntriesToSubscriber(entries, subscriber, ReadDirection.FORWARD);
+        streamEntryProcessor.provideEntriesToSubscriber(entries, subscriber, Take.ALL, ReadDirection.FORWARD);
 
         // Assert
         //
@@ -231,7 +232,7 @@ public class StreamEntryProcessorTest {
 
         // Act
         //
-        streamEntryProcessor.provideEntriesToSubscriber(entries, subscriber, ReadDirection.FORWARD);
+        streamEntryProcessor.provideEntriesToSubscriber(entries, subscriber, Take.ALL, ReadDirection.FORWARD);
 
         // Assert
         //
@@ -275,7 +276,7 @@ public class StreamEntryProcessorTest {
 
         // Act
         //
-        streamEntryProcessor.provideEntriesToSubscriber(entries, subscriber, ReadDirection.BACKWARD);
+        streamEntryProcessor.provideEntriesToSubscriber(entries, subscriber, Take.ALL, ReadDirection.BACKWARD);
 
         // Assert
         //
@@ -283,6 +284,46 @@ public class StreamEntryProcessorTest {
         inOrder.verify(subscriber, times(1)).onNext(entryThree);
         inOrder.verify(subscriber, times(1)).onNext(entryTwo);
         inOrder.verify(subscriber, times(1)).onNext(entryOne);
+    }
+
+    @Test
+    public void Entries_Should_Be_Sent_To_Subscriber_In_Original_Order_And_Only_First_Should_Be_Taken() {
+
+        // Arrange
+        //
+        StreamEntryProcessor streamEntryProcessor = new StreamEntryProcessor();
+
+        List<Entry> entries = new ArrayList<>();
+
+        Entry entryOne = constructValidEntry(0);
+        Entry entryTwo = constructValidEntry(1);
+        Entry entryThree = constructValidEntry(2);
+
+        Entry invalidEntry = new Entry();
+        invalidEntry.setEventNumber(3);
+        invalidEntry.setEventType(null);
+        entries.add(invalidEntry);
+
+        // Add the entries in reverse order
+        entries.add(invalidEntry);
+        entries.add(entryThree);
+        entries.add(entryTwo);
+        entries.add(entryOne);
+
+        Subscriber subscriber = mock(Subscriber.class);
+
+        InOrder inOrder = inOrder(subscriber);
+
+        // Act
+        //
+        streamEntryProcessor.provideEntriesToSubscriber(entries, subscriber, Take.ONE, ReadDirection.BACKWARD);
+
+        // Assert
+        //
+        inOrder.verify(subscriber, times(0)).onNext(invalidEntry);
+        inOrder.verify(subscriber, times(1)).onNext(entryThree);
+        inOrder.verify(subscriber, times(0)).onNext(entryTwo);
+        inOrder.verify(subscriber, times(0)).onNext(entryOne);
     }
 
     private Entry constructValidEntry(int eventNumber) {
