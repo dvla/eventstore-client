@@ -1,12 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>uk.gov.dvla.dsp</groupId>
-        <artifactId>dsp-parent</artifactId>
-        <version>4.2</version>
-    </parent>
-
     <groupId>uk.gov.dvla.osl</groupId>
     <artifactId>eventstore-client</artifactId>
     <version>2.4.4-SNAPSHOT</version>
@@ -20,6 +14,7 @@
         <rxjava.version>1.1.1</rxjava.version>
         <junit.version>4.12</junit.version>
         <eventstore.api.version>2.1.0</eventstore.api.version>
+        <version.dropwizard.jackson>2.9.7</version.dropwizard.jackson>
         <wiremock.version>1.58</wiremock.version>
         <retrofit.version>2.0.2</retrofit.version>
     </properties>
@@ -60,25 +55,23 @@
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${version.dropwizard.jackson}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.6.3</version>
+            <version>${version.dropwizard.jackson}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.6.3</version>
+            <version>${version.dropwizard.jackson}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
             <artifactId>jackson-jaxrs-json-provider</artifactId>
-            <version>2.6.3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-yaml</artifactId>
-            <version>2.6.3</version>
-            <scope>test</scope>
+            <version>${version.dropwizard.jackson}</version>
         </dependency>
         <dependency>
             <groupId>com.googlecode.json-simple</groupId>
@@ -125,12 +118,6 @@
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-library</artifactId>
             <version>1.3</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock</artifactId>
-            <version>1.57</version>
             <scope>test</scope>
         </dependency>
         <dependency>
